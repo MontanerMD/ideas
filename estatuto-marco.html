@@ -102,7 +102,6 @@
                 <button onclick="nav('argumentario')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="argumentario">Argumentario <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
                 <button onclick="nav('actores')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="actores">Actores <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
                 <button onclick="nav('frases')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="frases">Frases <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
-                <button onclick="nav('noticias')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="noticias">Noticias <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
                 <button onclick="openGlobalSearch()" class="ml-4 flex items-center px-3 py-1.5 text-xs text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"><i data-lucide="search" class="w-3 h-3 mr-2"></i> Buscar <kbd class="ml-2 font-mono text-[10px] bg-white px-1 py-0.5 rounded border border-slate-200">Cmd K</kbd></button>
             </nav>
         </div>
@@ -248,23 +247,6 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="frasesList"></div>
         </section>
 
-        <section id="noticias" class="view-section hidden animate-fade-in">
-            <header class="mb-10">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h1 class="font-display text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-primary to-slate-600">Hemeroteca y Actualidad</h1>
-                        <p class="text-lg text-slate-500 max-w-2xl">Últimas noticias obtenidas automáticamente de Google News. Actualización cada 15 minutos.</p>
-                    </div>
-                    <button onclick="forzarCargaNoticias()" class="flex items-center text-slate-600 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition-colors text-sm font-bold border border-slate-200 self-start md:self-auto shrink-0 shadow-sm">
-                        <i data-lucide="refresh-cw" class="w-4 h-4 mr-2" id="refresh-icon"></i> Actualizar
-                    </button>
-                </div>
-            </header>
-            <div class="relative border-l-2 border-slate-200 ml-4 pl-6 space-y-8 py-4" id="noticiasList">
-                <!-- El contenido se inyecta dinámicamente al abrir la pestaña -->
-            </div>
-        </section>
-
     </main>
 
     <footer class="bg-primary text-slate-400 py-12 mt-20 border-t border-slate-800 pb-28 md:pb-12">
@@ -331,9 +313,6 @@
                     <button onclick="nav('frases')" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-slate-400 hover:text-white transition-colors relative" data-target="frases">
                         <i data-lucide="message-square" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Frases</span><div class="nav-dot absolute top-2 right-4 w-1.5 h-1.5 bg-rose-500 rounded-full opacity-0 transition-opacity"></div>
                     </button>
-                    <button onclick="nav('noticias')" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-slate-400 hover:text-white transition-colors relative" data-target="noticias">
-                        <i data-lucide="newspaper" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Noticias</span><div class="nav-dot absolute top-2 right-4 w-1.5 h-1.5 bg-rose-500 rounded-full opacity-0 transition-opacity"></div>
-                    </button>
                     <button onclick="openGlobalSearch()" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-accent hover:text-blue-400 transition-colors relative">
                         <i data-lucide="search" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Buscar</span>
                     </button>
@@ -399,14 +378,16 @@
             });
             document.querySelectorAll('.nav-item-mobile').forEach(el => {
                 const icon = el.querySelector('svg') || el.querySelector('i'), dot = el.querySelector('.nav-dot');
-                if(el.dataset.target === sectionId) { el.classList.replace('text-slate-400', 'text-white'); if(icon) icon.classList.add('-translate-y-1', 'text-action'); if(dot) dot.classList.replace('opacity-0', 'opacity-100'); } 
-                else { el.classList.replace('text-white', 'text-slate-400'); if(icon) icon.classList.remove('-translate-y-1', 'text-action'); if(dot) dot.classList.replace('opacity-100', 'opacity-0'); }
+                if(el.dataset.target === sectionId) { 
+                    el.classList.replace('text-slate-400', 'text-white'); 
+                    if(icon) icon.classList.add('-translate-y-1', 'text-action'); 
+                    if(dot) dot.classList.replace('opacity-0', 'opacity-100'); 
+                } else { 
+                    el.classList.replace('text-white', 'text-slate-400'); 
+                    if(icon) icon.classList.remove('-translate-y-1', 'text-action'); 
+                    if(dot) dot.classList.replace('opacity-100', 'opacity-0'); 
+                }
             });
-            
-            // Disparar la carga de noticias si se abre esa pestaña
-            if (sectionId === 'noticias') {
-                cargarNoticias();
-            }
             
             closeGlobalSearch();
         }
@@ -853,144 +834,6 @@
                 </div>`
             }).join('');
             lucide.createIcons();
-        }
-
-        function renderLoadingNoticias() {
-            document.getElementById('noticiasList').innerHTML = `
-                <div class="flex items-center text-slate-500 font-medium text-sm mb-6 animate-pulse">
-                    <i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Actualizando noticias...
-                </div>
-                ${[1,2,3].map(() => `
-                    <div class="animate-pulse relative">
-                        <div class="absolute -left-[31px] bg-slate-200 w-4 h-4 rounded-full mt-1"></div>
-                        <div class="flex-1 space-y-4 py-1">
-                            <div class="h-3 bg-slate-200 rounded w-1/4"></div>
-                            <div class="h-5 bg-slate-200 rounded w-3/4"></div>
-                            <div class="h-3 bg-slate-200 rounded w-5/6"></div>
-                        </div>
-                    </div>
-                `).join('')}
-            `;
-            lucide.createIcons();
-        }
-
-        function renderNoticiasUI(noticias) {
-            if (!noticias || noticias.length === 0) {
-                document.getElementById('noticiasList').innerHTML = `
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
-                        <i data-lucide="inbox" class="w-8 h-8 text-slate-400 mx-auto mb-3"></i>
-                        <p class="text-slate-500 font-medium">No hay noticias recientes relevantes.</p>
-                    </div>
-                `;
-                lucide.createIcons();
-                return;
-            }
-
-            document.getElementById('noticiasList').innerHTML = noticias.map(n => `
-                <div class="relative group">
-                    <div class="absolute -left-[31px] bg-white border-2 border-slate-200 group-hover:border-action transition-colors w-4 h-4 rounded-full mt-1"></div>
-                    <div class="flex gap-2 items-center mb-1">
-                        <span class="text-xs font-bold text-slate-400">${n.fecha}</span>
-                        <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase font-bold">${n.medio}</span>
-                    </div>
-                    <div class="block group-hover:bg-slate-50 p-3 -ml-3 rounded-lg transition-colors">
-                        <a href="${n.link}" target="_blank" rel="noopener noreferrer" class="hover:underline inline-block">
-                            <h4 class="font-display text-lg font-bold text-primary mb-1 group-hover:text-action transition-colors">${n.tit}</h4>
-                        </a>
-                        <p class="text-sm text-slate-600 mt-1">${n.res}</p>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        async function forzarCargaNoticias() {
-            const icon = document.getElementById('refresh-icon');
-            if(icon) icon.classList.add('animate-spin');
-            await cargarNoticias(true);
-            if(icon) icon.classList.remove('animate-spin');
-            showToast('Noticias actualizadas', 'success');
-        }
-
-        async function cargarNoticias(forceRefresh = false) {
-            const cacheKey = 'mi_noticias_cache';
-            const timeKey = 'mi_noticias_time';
-            const now = Date.now();
-            const cacheTime = localStorage.getItem(timeKey);
-            const cachedData = localStorage.getItem(cacheKey);
-
-            // Caché de 15 minutos = 15 * 60 * 1000 = 900000 milisegundos
-            if (!forceRefresh && cachedData && cacheTime && (now - parseInt(cacheTime) < 900000)) {
-                renderNoticiasUI(JSON.parse(cachedData));
-                return;
-            }
-
-            renderLoadingNoticias();
-
-            try {
-                // RSS de Google News España. Query exhaustiva y específica. Usamos rss2json como proxy CORS gratuito.
-                const query = encodeURIComponent('("huelga medica" OR "estatuto marco sanitario" OR "medicos España condiciones laborales" OR "conflicto sanidad publica España" OR "sindicatos medicos España") AND España');
-                const rssUrl = encodeURIComponent(`https://news.google.com/rss/search?q=${query}&hl=es&gl=ES&ceid=ES:es`);
-                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${rssUrl}`;
-                
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error('Error en la petición de red');
-                const data = await response.json();
-
-                if (data.status === 'ok' && data.items) {
-                    const items = data.items.slice(0, 8).map(item => {
-                        // Extraer el nombre del medio del link o del título
-                        let medio = 'Prensa';
-                        try { medio = new URL(item.link).hostname.replace('www.', '').split('.')[0]; } catch(e){}
-                        
-                        // Google news suele añadir " - Nombre Del Medio" al final del título
-                        let tituloLimpio = item.title;
-                        const partesTitulo = item.title.split(' - ');
-                        if (partesTitulo.length > 1) {
-                            medio = partesTitulo.pop(); // Sacar el último elemento (el medio)
-                            tituloLimpio = partesTitulo.join(' - '); // Reconstruir el título sin el medio
-                        }
-                        
-                        // Limpiar HTML de la descripción para evitar XSS y romper layout
-                        let tempDiv = document.createElement("div");
-                        tempDiv.innerHTML = item.description;
-                        let textRes = tempDiv.textContent || tempDiv.innerText || "";
-                        textRes = textRes.substring(0, 160) + (textRes.length > 160 ? '...' : '');
-
-                        return {
-                            fecha: new Date(item.pubDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }),
-                            medio: medio.trim(),
-                            tit: tituloLimpio.trim(),
-                            res: textRes.trim(),
-                            link: item.link
-                        };
-                    });
-                    
-                    localStorage.setItem(cacheKey, JSON.stringify(items));
-                    localStorage.setItem(timeKey, now.toString());
-                    renderNoticiasUI(items);
-                } else {
-                    throw new Error('Sin items válidos en RSS');
-                }
-            } catch (error) {
-                console.error("Error cargando noticias:", error);
-                if (cachedData) {
-                    renderNoticiasUI(JSON.parse(cachedData)); 
-                    showToast('Mostrando noticias cacheadas (sin conexión)', 'info');
-                } else {
-                    document.getElementById('noticiasList').innerHTML = `
-                        <div class="bg-rose-50 border border-rose-200 text-rose-600 p-6 rounded-2xl flex flex-col items-center text-center">
-                            <i data-lucide="wifi-off" class="w-8 h-8 mb-3"></i>
-                            <p class="font-bold text-lg">No se han podido cargar las noticias.</p>
-                            <p class="text-sm mt-2 opacity-80">Comprueba tu conexión o inténtalo más tarde.</p>
-                            <button onclick="cargarNoticias()" class="mt-4 bg-white px-4 py-2 rounded-lg text-rose-600 font-bold border border-rose-200 hover:bg-rose-100 transition-colors">
-                                Reintentar
-                            </button>
-                        </div>
-                    `;
-                    lucide.createIcons();
-                }
-            }
         }
 
         // INIT
