@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defensa Médica - Huelga 2026</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Map para dependencias de React y Lucide -->
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "lucide-react": "https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0"
+            }
+        }
+    </script>
+    
+    <!-- Babel para compilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slide-in-from-bottom { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-in { animation-fill-mode: both; }
+        .fade-in { animation-name: fade-in; }
+        .slide-in-from-bottom-4 { animation-name: slide-in-from-bottom; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 24px); }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { 
+          ShieldAlert, ListChecks, Newspaper, Stethoscope, ChevronDown, ChevronUp, Share2, Clock,
+          Briefcase, MessageSquare, Scale, GraduationCap, Users, Shield, FileText, Activity, Banknote,
+          Search, Microscope, Gavel, MonitorPlay, Syringe, ExternalLink, Info, AlertTriangle
+        } from 'lucide-react';
+
+        const demands = [
+          { id: 1, category: 'Jurídico', title: '1. Estatuto Médico Propio (Fuera de la Ley 55/2003)', description: 'La asimetría civil y penal del acto médico (diagnóstico, indicación quirúrgica, alta) no puede regularse por el mismo estatuto que un auxiliar administrativo. Exigimos la salida del Estatuto Marco y una negociación bilateral con el Ministerio, fuera de la Mesa General dominada por CCOO y UGT.', icon: <Gavel className="w-6 h-6 text-indigo-500" /> },
+          { id: 2, category: 'Retributivo', title: '2. Creación del Nivel A1 Plus (MECES 3)', description: 'El Grado en Medicina (360 ECTS) equivale a un Máster oficial (MECES 3). Compartir subgrupo administrativo con grados de 240 ECTS es un agravio. El A1 Plus debe reflejarse en un incremento lineal del sueldo base y de los trienios.', icon: <Banknote className="w-6 h-6 text-amber-500" /> },
+          { id: 3, category: 'Laboral', title: '3. Jornada Estricta de 35h Semanales', description: 'Transposición real de la Directiva 2003/88/CE. Eliminación del cómputo irregular y de los promedios semestrales que encubren semanas de 80 horas. Las 35 horas deben ser el límite real y absoluto de lunes a viernes.', icon: <Clock className="w-6 h-6 text-teal-500" /> },
+          { id: 4, category: 'Guardias', title: '4. Fin de las Guardias de 24h (Turnos de 12h)', description: 'La fatiga extrema multiplica por tres los eventos adversos graves en cirugía. Sustitución progresiva del modelo de 24h por turnos estructurales de 12h para garantizar la seguridad clínica.', icon: <Activity className="w-6 h-6 text-red-500" /> },
+          { id: 5, category: 'Guardias', title: '5. Voluntariedad y Pago al 150%', description: 'Las horas de guardia deben pagarse como horas extraordinarias (150% de la hora ordinaria) con plus de nocturnidad y festividad. Actualmente se paga por debajo del precio de la hora ordinaria base.', icon: <Banknote className="w-6 h-6 text-emerald-500" /> },
+          { id: 6, category: 'Descanso', title: '6. Descanso Ininterrumpido de 24h', description: 'El descanso post-guardia no es un privilegio, es recuperación biológica. Debe ser de 24 horas reales, no recuperable y sin penalización en la jornada anual.', icon: <Clock className="w-6 h-6 text-blue-400" /> },
+          { id: 7, category: 'MIR', title: '7. Derogación del RD 1146/2006', description: 'El residente no es mano de obra barata estructural. Elaboración de un nuevo Estatuto del Facultativo en Formación que penalice a las gerencias que usen a los MIR para cubrir ausencias de adjuntos.', icon: <GraduationCap className="w-6 h-6 text-purple-500" /> },
+          { id: 8, category: 'MIR', title: '8. Supervisión MIR 100% Presencial', description: 'Garantía jurídica de presencia física del especialista adjunto. Registro obligatorio de supervisión para eximir al residente de responsabilidad penal derivada de la saturación de urgencias.', icon: <Shield className="w-6 h-6 text-slate-700" /> },
+          { id: 9, category: 'MIR', title: '9. Recuperación Salarial del MIR (+25%)', description: 'El sueldo base del MIR roza el Salario Mínimo Interprofesional. Exigimos una subida salarial lineal del 25% para paliar la pérdida de poder adquisitivo acumulada desde 2009 y el cobro del grado de formación desde R1.', icon: <Scale className="w-6 h-6 text-purple-400" /> },
+          { id: 10, category: 'Retributivo', title: '10. Devolución de la Paga Extra Íntegra', description: 'Fin del recorte impuesto en 2010 (Zapatero) que amputó hasta un 45% del sueldo base y trienios en las pagas extras del Grupo A1. Exigimos extras al 100%.', icon: <Banknote className="w-6 h-6 text-emerald-600" /> },
+          { id: 11, category: 'Asistencial', title: '11. Límite Innegociable de Agendas', description: 'Máximo 30 pacientes/día en Atención Primaria (15 min/paciente) y 25 en Pediatría. En los hospitales, agendas ajustadas a la complejidad sin dobles huecos ni "bisecciones".', icon: <Users className="w-6 h-6 text-rose-500" /> },
+          { id: 12, category: 'Asistencial', title: '12. Prohibición de Reparto de Cupos', description: 'La ausencia de un facultativo (baja, vacaciones) no se puede solucionar "repartiendo" a sus pacientes entre los compañeros que ya están al 100% de capacidad. Contratación de pools estructurales de sustitución.', icon: <ListChecks className="w-6 h-6 text-rose-400" /> },
+          { id: 13, category: 'Cirugía', title: '13. Blindaje del Tiempo de Quirófano', description: 'El cirujano precisa mantener destreza técnica. Exigimos tiempo quirúrgico protegido dentro de la jornada ordinaria y dimensionamiento de camas UCI/REA para evitar la cancelación de cirugías oncológicas.', icon: <Syringe className="w-6 h-6 text-red-600" /> },
+          { id: 14, category: 'Formativo', title: '14. 20% del Tiempo para I+D+i y Docencia', description: 'La Medicina Basada en la Evidencia (MBE) requiere estudio constante (ej. actualización en técnicas como TaTME en coloproctología). El 20% de la jornada debe estar protegido por ley para no investigar en el tiempo personal.', icon: <Microscope className="w-6 h-6 text-indigo-500" /> },
+          { id: 15, category: 'Jurídico', title: '15. Exención de Responsabilidad por Colapso', description: 'Cobertura legal total cuando el error clínico derive de la sobrecarga extrema impuesta por la dirección (ej. pacientes en pasillos, falta de camas, ratios ilegales). La responsabilidad penal debe ser subsidiaria de la Administración.', icon: <Gavel className="w-6 h-6 text-slate-800" /> },
+          { id: 16, category: 'Digital', title: '16. Regulación Ética de la IA y Salud Digital', description: 'La IA y la telemedicina deben ser herramientas auditadas clínicamente por la AEMPS, utilizadas como soporte y nunca impuestas por las gerencias como triaje "low-cost" para ahorrar en contrataciones.', icon: <MonitorPlay className="w-6 h-6 text-cyan-500" /> },
+          { id: 17, category: 'Asistencial', title: '17. Fin del Modelo de Peonadas a Destajo', description: 'La reducción de listas de espera no se puede basar en operar de tarde con fatiga acumulada. Apertura estructural de quirófanos de tarde con plantillas estables.', icon: <Syringe className="w-6 h-6 text-red-400" /> },
+          { id: 18, category: 'Jubilación', title: '18. Jubilación Anticipada a los 60 Años', description: 'Aplicación del RD 1698/2011 por penosidad, toxicidad y trabajo a turnos nocturnos. El estrés quirúrgico y clínico justifican el derecho al retiro íntegro a los 60 años.', icon: <Activity className="w-6 h-6 text-emerald-500" /> },
+          { id: 19, category: 'Jubilación', title: '19. Cómputo Doble de las Horas de Guardia', description: 'Las miles de horas de guardia realizadas de noche y festivos deben cotizar y computar íntegramente como tiempo trabajado para la vida laboral y la pensión máxima.', icon: <Clock className="w-6 h-6 text-teal-600" /> },
+          { id: 20, category: 'Laboral', title: '20. Exención Voluntaria de Guardias > 55 Años', description: 'Garantía real del derecho sin que suponga un castigo retributivo. Implantación obligatoria de módulos de tarde (actividad clínica o investigadora) para compensar la exención.', icon: <ShieldAlert className="w-6 h-6 text-amber-500" /> },
+          { id: 21, category: 'Retributivo', title: '21. Carrera Profesional Homogénea', description: 'Mismos baremos en todo el Sistema Nacional de Salud. Pago efectivo e inmediato en todos los grados a los médicos interinos, cumpliendo con la jurisprudencia europea.', icon: <Briefcase className="w-6 h-6 text-blue-500" /> },
+          { id: 22, category: 'Retributivo', title: '22. Fin de la Penalización por Exclusividad', description: 'Eliminación del descuento en el Complemento Específico a los médicos que ejercen en la sanidad privada en su tiempo libre. Es una injerencia inconstitucional.', icon: <Scale className="w-6 h-6 text-slate-500" /> },
+          { id: 23, category: 'Gestión', title: '23. Profesionalización de la Gestión Clínica', description: 'Las Jefaturas de Servicio y Direcciones Médicas deben ser adjudicadas por concurso público de méritos técnicos y científicos, no por libre designación política (dedocracia).', icon: <ListChecks className="w-6 h-6 text-indigo-400" /> },
+          { id: 24, category: 'Salud Mental', title: '24. Burnout como Enfermedad Profesional', description: 'El Síndrome de Desgaste Profesional y el TEPT derivado de presión asistencial deben ser catalogados y cubiertos como enfermedades profesionales por las mutuas de accidentes de trabajo.', icon: <Stethoscope className="w-6 h-6 text-pink-500" /> },
+          { id: 25, category: 'Asistencial', title: '25. Creación de PACs 24h y Dotación de Urgencias', description: 'Filtro efectivo previo a la urgencia hospitalaria. Dotación de celadores, seguridad y personal médico suficiente para detener el incremento de agresiones en PACs y Hospitales.', icon: <Shield className="w-6 h-6 text-red-700" /> }
+        ];
+
+        const argumentsList = [
+          { id: 1, category: 'Fatiga y Guardias', q: '¿Por qué sois el único colectivo que rechaza el límite de 17 horas del Gobierno?', a: 'Porque contiene la trampa "salvo necesidades asistenciales". En un sistema colapsado, esa cláusula legaliza que nos sigan obligando a hacer 24h o 36h seguidas. El límite debe ser estricto y de 12h.' },
+          { id: 2, category: 'Cirugía', q: 'Si canceláis las cirugías programadas estáis jugando con la salud de la gente.', a: 'El riesgo real es que te opere un cirujano de cáncer colorrectal que lleva 20 horas sin dormir. La huelga suspende quirófanos hoy para exigir que mañana operemos en condiciones de seguridad, aplicando la MBE, no la resistencia bélica.' },
+          { id: 3, category: 'Retribución', q: 'Ya cobráis mucho, sois el A1.', a: 'Nuestro sueldo base es de los más bajos de la UE. Lo que nos eleva la nómina son las horas extra (guardias) trabajadas de madrugada y pagadas por debajo del precio de la hora diurna. Exigimos el nivel A1 Plus que refleje nuestros 11 años de formación.' },
+          { id: 4, category: 'MIR', q: 'Los residentes se quejan pero así fue la medicina siempre.', a: 'La esclavitud no se justifica por la tradición. Usar a un R2 para sacar el trabajo de dos adjuntos en la puerta de urgencias a base de amenazas académicas es un delito, no un plan de estudios.' },
+          { id: 5, category: 'Pacientes', q: 'Asociaciones de Pacientes quieren mediar, ¿por qué las vetáis?', a: 'Porque el paciente es la parte afectada por las listas de espera, pero el conflicto es laboral (trabajador vs. estado). La mediación requiere conocimientos de Derecho Laboral y Sanitario, no escudos humanos por parte del Ministerio.' },
+          { id: 6, category: 'Gestión', q: 'El Estado no tiene dinero para pagar vuestras 25 demandas.', a: 'Hay dinero para rescatar peajes y empresas privadas. La sanidad se desmantela por decisión política, priorizando el ahorro sobre la vida. Contratar médicos es inversión rentable, acorta estancias en UCI y reduce complicaciones.' },
+          { id: 7, category: 'Sindicatos', q: 'UGT y CCOO firmaron el Estatuto, ¿sois unos elitistas?', a: 'CCOO y UGT representan a la mayoría no médica del hospital. Nuestro riesgo penal, civil y nivel de estrés biológico no puede ser diluido en los votos de quien no va al juzgado si la anastomosis del colon falla. Queremos Estatuto propio.' },
+          { id: 8, category: 'Investigación', q: 'Queréis un 20% de la jornada para investigar y no ver enfermos.', a: 'La Medicina sin estudio es peligrosa. Si un coloproctólogo no dedica tiempo a leer las guías de NCCN o aprender técnica TaTME, ofrecerá medicina obsoleta. Estudiar salva más vidas que ver enfermos en 3 minutos.' },
+          { id: 9, category: 'Telemedicina', q: 'La inteligencia artificial y las citas telefónicas van a solucionar las demoras.', a: 'La tecnología complementa, no sustituye. Un abdomen agudo no se diagnostica por teléfono. La gerencia usa la telemedicina para camuflar que faltan médicos en la consulta, convirtiendo el acto médico en un call-center peligroso.' },
+          { id: 10, category: 'Jubilación', q: 'Jubilaros a los 60 años es un lujo cuando el resto va a los 67.', a: 'A los 60 años, con 4 guardias al mes desde los 25, ya trabajamos las horas de la vida laboral de una persona de 75 años. La privación de sueño acorta la esperanza de vida. No es un lujo, es un coeficiente reductor biológico por penosidad.' },
+          { id: 11, category: 'Fatiga y Guardias', q: 'Pero las guardias se pueden dormir en el hospital si no hay avisos.', a: 'Mito absoluto. En un hospital moderno la presión de la urgencia no para. Además, el sueño fragmentado en estado de alerta (vigilancia) impide la entrada en fases profundas del sueño, el daño neurocognitivo es el mismo.' },
+          { id: 12, category: 'Cirugía', q: 'Si limitamos los quirófanos a las mañanas, la lista crece.', a: 'Por eso exigimos plantillas completas en turno de tarde (peonadas estructurales, no a destajo). El hospital tiene que estar abierto, pero no a costa del lomo del mismo cirujano que lleva allí desde las 8 de la mañana.' },
+          { id: 13, category: 'MIR', q: 'Sin los residentes el hospital se cierra.', a: 'Cierto, y esa es la mayor prueba del fraude de ley. Un sistema formativo no puede ser la viga de carga de la atención continuada del Estado. Si un residente falta, no debería notarse en la asistencia, solo en su aula.' },
+          { id: 14, category: 'Retribución', q: 'El pago al 150% de las guardias quiebra las autonomías.', a: 'Si cualquier trabajador del sector del metal cobra su hora extra a más valor que la ordinaria, ¿por qué la salud humana vale menos que reparar un coche? La dignidad empieza por la nómina.' },
+          { id: 15, category: 'Estatuto', q: 'Queréis privilegios laborales fuera de la Función Pública.', a: 'Querremos garantías acordes a la responsabilidad. No puedes aplicarle el mismo reglamento de descanso a quien archiva papeles y a quien tiene que intubar a un bebé prematuro a las 5 de la madrugada.' },
+          { id: 16, category: 'Pacientes', q: 'Un médico de familia viendo 50 pacientes al día también los cura.', a: 'No los cura, los desplaza. Viendo a un paciente cada 4 minutos solo da tiempo a firmar una receta o una baja. La hipermedicación y los diagnósticos tardíos oncológicos derivan de estas agendas criminales.' },
+          { id: 17, category: 'Burnout', q: 'La ansiedad en el trabajo la tenemos todos, no solo los médicos.', a: 'La ansiedad de no llegar a objetivos no es igual al Trauma Moral de ver morir a un paciente porque tu gerencia no compró material o no abrió una cama de UCI. Ese daño psicológico es permanente.' },
+          { id: 18, category: 'Investigación', q: 'Podéis investigar en los congresos, que os pagan los laboratorios.', a: 'Exacto, y eso genera un conflicto de interés que denunciamos. El Estado debería asumir la formación continuada y el tiempo protegido para investigar con independencia total de la industria farmacéutica.' },
+          { id: 19, category: 'Jurídico', q: 'Si cometéis un error, debéis ir al juzgado solos.', a: 'Si el error es impericia (Lex Artis), sí. Pero si yerro prescribiendo porque llevo 60 pacientes y la historia clínica electrónica falló, la culpa in vigilando y estructural es de la Consejería. Esos pleitos deberían pararlos ellos.' },
+          { id: 20, category: 'Digital', q: 'El "Big Data" ayudará a prescindir de adjuntos veteranos.', a: 'El Big Data predice patrones poblacionales, no opera fístulas complejas ni da malas noticias con empatía. La tecnología sin supervisión clínica experta convierte las desviaciones estadísticas en cadáveres.' },
+          { id: 21, category: 'Jornada', q: 'Promediar las horas en 6 meses cumple la ley europea.', a: 'La biología no promedia. El hígado o el corazón del médico que trabajó 90 horas una semana no se cura porque descanse en noviembre. Esa trampa legal aplasta nuestra salud cardiovascular.' },
+          { id: 22, category: 'Peonadas', q: 'Operar por las tardes os da mucho dinero extra.', a: 'El sistema lo pervierte: paga para sacar lista mientras mantiene los quirófanos matinales cerrados por falta de celadores. La salud debe pagarse en la jornada base, no comprando nuestro descanso para tapar mala gestión.' },
+          { id: 23, category: 'Política', q: 'La huelga médica es un ataque al partido del gobierno.', a: 'Es un ataque a la mala praxis administrativa, gobierne quien gobierne. Las leyes que combatimos (Ley 55/2003) fueron aprobadas por unos y el decreto de recortes de 2010 por otros. Nuestra lealtad es a la medicina.' },
+          { id: 24, category: 'Exclusividad', q: 'Queréis cobrar la exclusividad pero trabajar en la privada.', a: 'La exclusividad es un secuestro del título. El resto de funcionarios pueden tener negocios fuera de horario sin que se les quite el complemento específico. Retenernos el dinero por operar fuera del horario público es un robo legalizado.' },
+          { id: 25, category: 'Guardias', q: 'Sin guardias de 24h se rompe la continuidad asistencial.', a: 'La continuidad se logra con un buen traspaso de información (hand-over) e historias clínicas detalladas, no obligando a un humano a estar 24h en la UCI hasta que su cerebro no procese adecuadamente las dosis.' },
+          { id: 26, category: 'Agresiones', q: 'Las agresiones a médicos son fruto de la frustración del paciente.', a: 'Y esa frustración la generan las listas de espera y el colapso de los PAC, no el médico. La Consejería nos expone sin guardias de seguridad como si fuésemos escudos humanos de su déficit presupuestario.' },
+          { id: 27, category: 'Cirugía', q: '¿Por qué un cirujano precisa "tiempo quirúrgico protegido"?', a: 'Si haces mucha consulta y no pisas el quirófano, tu mano pierde memoria muscular (curva de aprendizaje en descenso). Un cirujano que no opera periódicamente deviene en un peligro para el paciente.' },
+          { id: 28, category: 'Jubilación', q: 'Permitiros retiraros a los 55 es abandonar el sistema.', a: 'Es dejar de hacer noches, no abandonar el sistema. Los adjuntos mayores tienen un gran valor en la docencia y quirófanos de complejidad, pero su ritmo circadiano ya no soporta una guardia a pie de cama.' },
+          { id: 29, category: 'Carrera', q: 'La carrera profesional encarece el sistema.', a: 'Recompensa la mejora técnica. Que un médico se esfuerce en publicar, auditar infecciones de herida quirúrgica y hacer doctorado salva dinero reduciendo morbilidad. Pagar esa excelencia es la mejor inversión.' },
+          { id: 30, category: 'Atención Primaria', q: 'Los médicos de familia solo derivan al especialista.', a: 'Un buen médico de AP resuelve el 85% de los casos si le dan 15 minutos por paciente. Al darles 4 minutos, nos obliga a hacer medicina defensiva y derivar por no tener tiempo de explorar. Han destruido la puerta del sistema.' },
+          { id: 31, category: 'MIR', q: 'El MIR está sobreprotegido por las unidades docentes.', a: 'Falso. Muchas direcciones presionan al tutor para que el MIR haga trabajo estructural. La formación se sacrifica por el asistencialismo barato.' },
+          { id: 32, category: 'Gestión', q: 'Las jefaturas clínicas son buenos gestores.', a: 'Cuando la jefatura se elige a dedo por el gerente (afín político), el jefe obedece presupuestos, no la evidencia clínica. Queremos jefaturas por méritos opuestos y libres.' },
+          { id: 33, category: 'Salario', q: 'El Grupo A1 abarca a muchos, ¿por qué sois especiales?', a: 'Ningún A1 tiene nuestra asimetría formativa y penal. Un ingeniero de caminos tiene la misma formación en años, pero el Nivel A1 Plus reconoce la responsabilidad directa sobre la vida en turnos extremos.' },
+          { id: 34, category: 'Fatiga y Guardias', q: 'Una guardia de puerta en Urgencias tampoco es tan dura.', a: 'Ver 80 pacientes en una noche, filtrando infartos o sepsis entre cientos de catarros y ansiedades, es un terror biológico. La presión tritura el cerebro del facultativo.' },
+          { id: 35, category: 'Digital', q: 'Las apps móviles harán de médicos 24/7.', a: 'La salud móvil solo aporta datos. Sin un médico con tiempo estructural para leer, interpretar y actuar sobre ese Big Data, las apps solo generan hiperfrecuentación e hipocondría.' },
+          { id: 36, category: 'Burnout', q: 'El suicidio médico es un tabú.', a: 'Es una pandemia silenciada. La tasa de suicidio en facultativas es hasta un 130% superior a la población general. El sistema mata a su primera línea y después lo esconde.' },
+          { id: 37, category: 'Pacientes', q: 'La huelga rompe la "relación médico-paciente".', a: 'La relación se rompe cuando el contrato del interino dura días y el paciente ve a un médico distinto cada martes. La huelga busca estabilizar plantillas para que el enfermo conozca a su médico.' },
+          { id: 38, category: 'Peonadas', q: 'Los módulos de tarde vacían las urgencias.', a: 'Son un parche. Cuando se acaban los fondos del módulo, la lista vuelve a estallar. Solo sirven para que los políticos den ruedas de prensa temporales, mientras agotan a la plantilla.' },
+          { id: 39, category: 'Estatuto', q: 'Estatuto propio significa menos flexibilidad.', a: 'Significa reglas de juego adaptadas. Permitirá contratar suplentes rápido, castigar la ineficiencia y primar el mérito quirúrgico sin la farragosa burocracia actual de la Función Pública General.' },
+          { id: 40, category: 'Jurídico', q: 'Queréis blindaje total para ser impunes.', a: 'Queremos no ser culpables de la desinversión. Si tengo que reanimar con un desfibrilador que no se revisó, la culpa de que falle es de la gerencia, no de mi impericia técnica.' },
+          { id: 41, category: 'Cirugía', q: 'Un cirujano en el quirófano tiene todo a su disposición.', a: 'La realidad es que operamos con material obsoleto, mendigando horas de bisturí armónico y sin celadores para mover al enfermo. La huelga también es por renovar la obsolescencia tecnológica.' },
+          { id: 42, category: 'MIR', q: 'Subirle el 25% al sueldo MIR es excesivo.', a: 'Equivale a devolverlos al poder adquisitivo de la década de los 2000. Cuando alquilas un piso cerca de un hospital hoy, el sueldo base del MIR lo deja por debajo del umbral de pobreza urbana.' },
+          { id: 43, category: 'Investigación', q: 'Para leer guías de cáncer, hacéis grupos en WhatsApp.', a: 'La divulgación informal no exime de la necesidad legal de hospitales dedicando recursos a sesiones multidisciplinares intra-jornada. El WhatsApp no protege legalmente las decisiones de comité.' },
+          { id: 44, category: 'Guardias', q: '¿Cómo compensáis la diferencia de sueldo sin guardias?', a: 'Subiendo el sueldo base. La dependencia económica de las guardias para vivir dignamente es la pieza clave del chantaje del Ministerio para mantenernos durmiendo en sofás de hospital.' },
+          { id: 45, category: 'Sindicatos', q: 'Si salís de la mesa sectorial, vais a perder derechos.', a: 'Los derechos que protege la mesa general son los que interesan a la masa laboral mayoritaria (vacaciones y moscosos), que están bien, pero ignoran los pleitos jurídicos de responsabilidad o la docencia, que son los nuestros.' },
+          { id: 46, category: 'Gestión', q: 'Los médicos deberíais centraros en curar y olvidar la política.', a: 'La política gestiona nuestras camas. Si no hacemos política sanitaria (huelga), el gestor seguirá gastando el presupuesto de cirugía en campañas de publicidad.' },
+          { id: 47, category: 'Atención Primaria', q: 'La falta de rurales es por comodidad de los médicos jóvenes.', a: 'Es porque un rural está aislado, con 4 ayuntamientos a la espalda, haciendo guardias de ambulancia sin supervisión y cobrando lo mismo que en un hospital central. Los incentivos de zona de difícil cobertura tienen que ser drásticos.' },
+          { id: 48, category: 'Jubilación', q: 'Vuestra cotización ya es la más alta del régimen.', a: 'Topada por la base máxima, pero generamos un 40% más por las guardias, un dinero que el Estado "recauda" pero no nos computa ni para acercar la fecha de retiro ni en la cuantía de la pensión.' },
+          { id: 49, category: 'Pacientes', q: 'Los pacientes os aplaudieron, tenéis su apoyo.', a: 'El apoyo se convierte en quejas cuando la lista de espera crece. No queremos aplausos pasivos, queremos alianzas activas para echar al gestor que mantiene la planta cerrada en verano.' },
+          { id: 50, category: 'Fatiga y Guardias', q: '¿Por qué rechazáis la "agrupación de turnos"?', a: 'El Ministerio quiere que hagamos las 17 horas todas juntas en el fin de semana. Eso convierte el fin de semana en una trituradora biológica, e invalida el descanso.' },
+          { id: 51, category: 'Cirugía', q: '¿Cuál es el coste de una peonada vs estructura?', a: 'Pagar un cirujano exhausto de tarde sale "más barato" a la hora a corto plazo, pero el coste de complicaciones, reintervenciones por fallos y las infecciones sale carísimo. Lo barato mata.' },
+          { id: 52, category: 'Digital', q: 'Vosotros tenéis los sistemas más avanzados del Estado.', a: 'Tenemos programas informáticos de los 90 que se cuelgan cinco veces por mañana. Cada vez que la historia clínica "piensa", se pueden perder datos críticos de alergias.' },
+          { id: 53, category: 'MIR', q: 'Reivindicáis solo por vuestra comodidad, usáis a los MIR.', a: 'La huelga también es por ellos. El Comité está integrado por plataformas MIR que redactaron los puntos sobre la supervisión del RD 1146/2006.' },
+          { id: 54, category: 'Burnout', q: 'Las bajas por estrés en medicina son estigmatizadas.', a: 'Las gerencias las ocultan o las meten como "enfermedad común" para no subir la siniestralidad laboral. Exigimos la consideración de accidente/enfermedad profesional.' },
+          { id: 55, category: 'Jurídico', q: '¿Por qué la responsabilidad civil recae en la aseguradora y os quejáis?', a: 'La civil recae en la póliza, pero la penal (cárcel, inhabilitación) recae en la persona. Es un abismo que un ingeniero municipal no sufre pero nosotros asumimos a diario.' },
+          { id: 56, category: 'Guardias', q: '¿Un máximo de 3 guardias al mes cubrirá las carteleras?', a: 'Obliga a contratar. La actualidad permite hasta 7 o 8 en algunos hospitales por presión, una locura en la que se renuncia a los derechos de maternidad.' },
+          { id: 57, category: 'Estatuto', q: 'La uniformidad estatal es clave, el Estatuto Marco la da.', a: 'La uniformidad la dio el BOE en precariedad. Nuestro Estatuto propio seguiría siendo de ámbito estatal, garantizando salarios idénticos desde Murcia hasta Galicia.' },
+          { id: 58, category: 'Exclusividad', q: 'El que ejerce por la tarde pierde interés en la pública.', a: 'Falacia total. El cirujano que opera 3 hernias más en la privada adquiere más habilidad. Penalizarlo financieramente solo busca mantenerlo cautivo en la pública por cuatro céntimos.' },
+          { id: 59, category: 'Atención Primaria', q: 'Los Puntos de Atención Continuada (PAC) son prescindibles.', a: 'Sin los PAC, el hospital colapsa el lunes. Reducirles medios es el paso previo a colapsar las urgencias centrales de por vida. Dotación de celadores de seguridad ya.' },
+          { id: 60, category: 'Fatiga y Guardias', q: '¿Se pueden cambiar las guardias por jornada de tarde ordinaria?', a: 'Sí, eso son los turnos de 12h rotatorios de forma ordenada. Precisa más personal, que es la inversión de la que huye el Gobierno a toda costa.' },
+          { id: 61, category: 'Retribución', q: 'El A1 Plus encarecería los Presupuestos del Estado.', a: 'Cuesta menos el Nivel A1 Plus que los rescates a ministerios improductivos. Las finanzas lo asumen si hay voluntad política. La sanidad es el pilar del Estado de Bienestar.' },
+          { id: 62, category: 'Pacientes', q: 'Los pacientes exigen inmediatez con tanta tecnología.', a: 'El Amazon de la salud no existe. La medicina profunda requiere reflexión diagnóstica. No podemos ceder al capricho consumista promovido por apps gerenciales.' },
+          { id: 63, category: 'MIR', q: 'Los MIR extranjeros están cubriendo los huecos.', a: 'Bienvenidos sean, pero el Estado los explota con la misma impunidad, usándolos para evitar convocar plazas de adjunto en cuanto terminan, forzándolos a la fuga.' },
+          { id: 64, category: 'Cirugía', q: '¿Un residente operando un cáncer solo es ilegal?', a: 'Totalmente, pero en algunos rincones de la madrugada la falta de manos forzó delegaciones indebidas de responsabilidad. El Registro estricto blindaría esta seguridad.' },
+          { id: 65, category: 'Investigación', q: 'No hacer investigación no hace mal médico a nadie.', a: 'Las pautas oncológicas de hace 3 años hoy matan pacientes por infra-tratamiento en terapias diana. Si no investigas o te actualizas en red, eres un peligro letal.' },
+          { id: 66, category: 'Sindicatos', q: 'Vuestra huelga os enfrentará a las enfermeras.', a: 'De ningún modo. Las enfermeras sufren su propio drama y necesitan sus cupos y A1. Luchamos con nuestras especificidades, no les quitamos nada a ellas.' },
+          { id: 67, category: 'Gestión', q: '¿Qué propone la defensa médica frente a la corrupción de materiales?', a: 'Comisiones Clínicas que auditen la compra. Un gerente comprando suturas o grapadoras de baja calidad para cirugía por ahorro será denunciado por la Jefatura profesionalizada.' },
+          { id: 68, category: 'Burnout', q: 'Tenéis psicólogos en la mutua del hospital, ¿qué más queréis?', a: 'Tener un psicólogo que trabaja para tu jefe no genera confianza (conflicto de interés y ocultación en el PAIME). Queremos reconocimiento de enfermedad externa.' },
+          { id: 69, category: 'Guardias', q: 'Reducir la guardia implica que menos médicos conozcan tu caso.', a: 'Falso. Un buen hand-over sistematizado de 12h es mucho más seguro en el traspaso de la información que un residente zombi informando de memoria a las 8:00 AM.' },
+          { id: 70, category: 'Política', q: 'Vosotros negáis el diálogo aceptando la confrontación.', a: 'Aceptamos la confrontación porque el diálogo del Ministerio se basa en informes de resultados ya escritos. Mesas donde solo admiten discutir cómo se reparten las migajas.' },
+          { id: 71, category: 'Pacientes', q: 'Muchos pacientes se quejan de vuestro trato impersonal.', a: 'El médico de familia no puede mirarte a los ojos si en 4 minutos tiene que rellenar el formulario en el ordenador para darte una baja de forma burocrática. Tiempo es empatía.' },
+          { id: 72, category: 'Retribución', q: 'Cobrar las pagas extra enteras fue un lujo de la bonanza.', a: 'Nuestro contrato indica el salario. El decreto de 2010 fue una expropiación "temporal" para un problema de déficit europeo que aún 16 años después pagamos en la nómina nosotros.' },
+          { id: 73, category: 'MIR', q: 'El examen MIR es justo y ordena el talento.', a: 'El examen es justo, la explotación del que lo aprueba, no. Y cuando suspenden o cierran plazas MIR para no pagar la formación de nuevos especialistas, juegan con las cuotas de sangre.' },
+          { id: 74, category: 'Cirugía', q: 'Si sois tan buenos cirujanos, las peonadas no deberían importaros.', a: 'Messi no juega dos partidos seguidos el mismo día sin riesgo de romperse. Un cirujano operando de 8 a 15h no puede ponerse a limpiar un colon complicado a las 18h.' },
+          { id: 75, category: 'Jurídico', q: 'Pedir que el hospital pague las demandas fomentará las negligencias.', a: 'Inverso: fomentará que el hospital compruebe el estrés, las listas y la calidad de medios, ya que la Consejería es la que deberá indemnizar si nos obligan a operar inseguros.' },
+          { id: 76, category: 'Digital', q: 'El paciente prefiere la comodidad de una cita online.', a: 'Y la prefiere hasta que le obvian un melanoma por diagnosticarlo por Whatsapp. La medicina visual presencial es un derecho inalienable que los gestores quieren borrar.' },
+          { id: 77, category: 'Jubilación', q: 'Un médico a los 65 tiene toda la sabiduría para guiar a los jóvenes.', a: 'Esa sabiduría es brutal, pero se debe aplicar en sesiones clínicas, tutorizaciones o enseñanzas matinales, no poniéndolo en la primera línea de combate en un PAC a las 3 de la mañana.' },
+          { id: 78, category: 'Guardias', q: 'La limitación de 3 guardias supone el colapso en los veranos.', a: 'En verano la lista y la asistencia general no cierra, el problema son las camas. Que los servicios no tengan "suplentes de verano" consolidados genera la huida masiva a las mutuas.' },
+          { id: 79, category: 'Estatuto', q: 'La UE sancionará a España si os hace un estatuto al margen.', a: 'La UE tiene procedimientos de infracción contra España POR EL Estatuto Marco (eventualidad crónica en sanidad). Salir de él es cumplir la directiva europea de estabilidad.' },
+          { id: 80, category: 'Investigación', q: 'Los proyectos científicos los hacen unos pocos interesados.', a: 'Siempre y cuando no tengas un 20% del horario; si fuese obligatorio y protegido, todos los adjuntos publicarían revisiones mejorando los indicadores de morbilidad de su propio hospital.' },
+          { id: 81, category: 'Atención Primaria', q: 'Los PAC no sirven de filtro real, todos van al Hospital.', a: 'Van al Hospital porque en el PAC se recortó tanto que a menudo ni tienen acceso a la analítica básica o rx urgente. Dotar el PAC con tecnología evita ingresos absurdos.' },
+          { id: 82, category: 'Fatiga y Guardias', q: '¿Puede la sociedad rechazar que trabajéis 24h?', a: 'Si lo supieran, seguro que sí. El paciente pre-anestesiado rara vez calcula que su anestesista y su cirujano llevan en pie 20 horas continuadas, si no, saldrían corriendo.' },
+          { id: 83, category: 'MIR', q: 'La huelga MIR perjudicó su curva de conocimiento.', a: 'Hacer recados, cubrir consultas sin adjunto y fotocopiar historias perjudicaba su curva formativa desde hacía años. La huelga paró la degradación.' },
+          { id: 84, category: 'Gestión', q: 'Lo "productivo" es ver más pacientes en menos tiempo.', a: 'Falacia industrial de Henry Ford aplicada al cuerpo humano. Lo productivo es acertar con el diagnóstico a la primera, reducir complicaciones y la necesidad de segundas visitas. Eso requiere TIEMPO.' },
+          { id: 85, category: 'Pacientes', q: 'Nuestros impuestos os pagan el sueldo.', a: 'Y con nuestros sueldos, con nuestros impuestos (retenciones altísimas de las guardias) nos pagamos las infraestructuras. Somos el sector que más retorna al estado con nuestro sacrificio personal y retributivo.' },
+          { id: 86, category: 'Cirugía', q: '¿Por qué sois tan protectores de vuestras agendas?', a: 'Porque el Registro de Morbilidad audita nuestra excelencia. Cuando meten 12 enfermos en la lista quirúrgica en un hueco que es para 8, la excelencia se hace añicos por la prisa y el cansancio.' },
+          { id: 87, category: 'Jurídico', q: 'La Judicialización de la medicina paraliza todo.', a: 'La medicina defensiva, pedir TACs de más por miedo a la denuncia cuando se atiende a destajo en 3 minutos, tiene un coste estratosférico en euros y radiación que se frenaría con 15 min/paciente.' },
+          { id: 88, category: 'Sindicatos', q: 'Sois minoría, la democracia sindical es lo que hay.', a: 'La "democracia" en la que una mayoría ajena decide tus penas y responsabilidades únicas se llama tiranía de la mayoría. Por eso hay cámaras o comités específicos donde el voto es especializado.' },
+          { id: 89, category: 'Digital', q: 'Las recetas automáticas os liberaron tiempo.', a: 'Tardaron años. Pero por cada avance digital (receta), se impone un formulario absurdo informático que te resta 4 clics por paciente, ahogando el hipotético avance inicial.' },
+          { id: 90, category: 'Burnout', q: 'Podéis pedir una excedencia si estáis quemados.', a: 'Con hipotecas, y sabiendo que las excedencias llevan penalización o pérdida de interinidad, no es viable. El sistema obliga al reo a ahogarse dentro de la celda de su puesto.' },
+          { id: 91, category: 'Guardias', q: '¿Cuánto vale para vosotros la guardia de fin de semana?', a: 'Más allá de lo monetario, perderte las cenas con tus hijos y vivir con el miedo a una peritonitis cuando solo eres uno, vale más de lo que ninguna gerencia será capaz de pagarnos con el modelo actual.' },
+          { id: 92, category: 'Retribución', q: 'Cuando llegáis a los picos del nivel ya no reclamáis tanto.', a: 'Los recortes no diferencian por trienios. Y el agravio comparativo del A1 base sigue siendo injusto a punto de jubilarse, porque mermará la pensión. Reclamamos en todos los rangos.' },
+          { id: 93, category: 'Exclusividad', q: 'Trabajar mañana y tarde en otros hospitales privados os agota igual.', a: 'La fatiga es la misma biológicamente, cierto, pero en la privada está regulada, se elige, se limita la patología y no es de madrugada. El castigo salarial del gobierno tiene un corte ideológico, no clínico.' },
+          { id: 94, category: 'Política', q: 'El Ministerio cedió con la jornada en cinco años.', a: 'Una promesa electoral vacía a 5 años vista para desmovilizar, dejándolo a "pactos autonómicos" subjetivos. La limitación debe ser decreto ley BOE de efecto inmediato mientras hay huelga.' },
+          { id: 95, category: 'Investigación', q: '¿En vuestras hojas de evaluación dais cero a la investigación?', a: 'Deberíamos si fuésemos estrictos. Pero el orgullo de la profesión médica nos empuja a seguir publicando e innovando en casa de madrugada, haciendo creer a la administración que el modelo funciona.' },
+          { id: 96, category: 'Pacientes', q: 'El sistema sobrevive por las enfermeras, no por vosotros.', a: 'El sistema sobrevive por el equipo (Enfermería, TCAE, Celadores, Médicos). Nosotros somos los directores técnicos y responsables penales últimos. Ninguno justifica restar valor a los otros para dignificar nuestras líneas.' },
+          { id: 97, category: 'MIR', q: 'Muchos acaban la especialidad y no tienen destreza suficiente.', a: 'Fruto de las "guardias de puerta" extremas donde los sacaron de quirófano para parchear urgencias menores por ahorro, arruinándole horas de vuelo con el bisturí armónico al tutor.' },
+          { id: 98, category: 'Cirugía', q: 'Podéis programar pacientes como mejor consideréis.', a: 'A veces desde Dirección saltan la prioridad clínica por quejas en el defensor del pueblo, obligándote a operar a alguien de menos riesgo para cuadrar la estadística. Injerencia letal del político.' },
+          { id: 99, category: 'Jurídico', q: 'Los Colegios de Médicos ya cubren el asesoramiento penal.', a: 'Y pagan abogados, pero la Gestión tiene que hacerse responsable institucional de la cobertura de las ratios ilegales, el Colegio cubre al individuo que lo paga con la cuota mensual de su bolsillo.' },
+          { id: 100, category: 'El Objetivo', q: '¿Cuál es el fin último de esta Huelga y del Estatuto Propio?', a: 'Salvar a la medicina de su colapso. Un médico dignamente pagado, que duerme lo necesario, con tiempo para investigar y para el paciente, es la única garantía de supervivencia del sistema de salud universal.' }
+        ];
+
+        const generateDynamicNews = (currentTime) => {
+          const format = (daysOffset) => {
+            const d = new Date(currentTime);
+            d.setDate(d.getDate() - daysOffset);
+            return d.toLocaleDateString('es-ES', { weekday: 'long', day: '2-digit', month: 'short' }).toUpperCase();
+          };
+
+          return [
+            { id: 1, date: `HOY: ${format(0)} - 08:30H`, title: 'Bloqueo Quirúrgico Nacional: Suspendidas el 85% de las cirugías', summary: 'Los servicios de Cirugía General y Digestiva se limitan a la patología oncológica (Neoplasia colorrectal) y urgencias absolutas. El Comité del Colegio advierte: "Las peonadas son un peligro estructural ya superado".', source: 'Diario Médico', link: '#', tag: 'ÚLTIMA HORA', color: 'red' },
+            { id: 2, date: format(1), title: 'Fracaso en la mediación en Función Pública', summary: 'El Gobierno se niega a tramitar el Nivel A1 Plus alegando que genera un precedente inasumible para otras categorías. Los facultativos preparan recursos ante el Tribunal de Justicia Europeo.', source: 'Redacción Médica', link: '#', tag: 'ACTUALIDAD', color: 'blue' },
+            { id: 3, date: format(2), title: 'Directiva de Fatiga y Descanso: Bruselas da la razón a los médicos', summary: 'Un nuevo dictamen de la UE insiste en que el descanso compensatorio de 24 horas tras guardias maratonianas no es optativo ni "promediable". Presión jurídica máxima sobre el Estatuto Marco.', source: 'Europa Press', link: '#', tag: 'JURÍDICO', color: 'amber' },
+            { id: 4, date: format(4), title: 'El Colectivo MIR ampara las demandas y va a la calle', summary: 'Desde R1 hasta R5 se asoman a la huelga indefinida que ha paralizado consultas en todo el territorio para exigir la derogación del esclavista RD 1146/2006.', source: 'Gaceta Médica', link: '#', tag: 'SINDICATOS', color: 'slate' }
+          ];
+        };
+
+        const AccordionItem = ({ question, answer, category, onCopy }) => {
+          const [isOpen, setIsOpen] = useState(false);
+          return (
+            <div className="border border-slate-200 rounded-3xl bg-white shadow-sm overflow-hidden transition-all group hover:border-blue-300 hover:shadow-md">
+              <button 
+                onClick={() => setIsOpen(!isOpen)} 
+                className="w-full flex justify-between items-center p-5 text-left focus:outline-none bg-slate-50 hover:bg-blue-50/50 transition-colors"
+              >
+                <div className="flex items-start gap-4">
+                  <MessageSquare className="w-5 h-5 text-blue-600 flex-shrink-0 mt-1" />
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">{category}</span>
+                    <span className="font-extrabold text-slate-800 pr-6 leading-snug">{question}</span>
+                  </div>
+                </div>
+                <div className="bg-white p-1 rounded-full border border-slate-200 group-hover:border-blue-200 transition-colors">
+                  {isOpen ? <ChevronUp className="text-slate-500 flex-shrink-0 w-4 h-4" /> : <ChevronDown className="text-slate-400 flex-shrink-0 w-4 h-4" />}
+                </div>
+              </button>
+              <div className={`px-5 transition-all duration-300 ease-in-out ${isOpen ? 'max-h-[1000px] py-6 border-t border-slate-100 opacity-100' : 'max-h-0 py-0 opacity-0'}`}>
+                <p className="text-slate-600 font-medium leading-relaxed text-sm md:text-base mb-6 text-justify border-l-2 border-blue-200 pl-4">
+                  {answer}
+                </p>
+                <button 
+                  onClick={() => onCopy(answer)}
+                  className="flex items-center gap-2 text-[10px] font-black text-blue-600 bg-blue-50 border border-blue-100 px-4 py-2.5 rounded-xl hover:bg-blue-600 hover:text-white transition-colors uppercase tracking-widest"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Añadir al portapapeles (Difundir)
+                </button>
+              </div>
+            </div>
+          );
+        };
+
+        const App = () => {
+          const [activeTab, setActiveTab] = useState('home');
+          const [searchQuery, setSearchQuery] = useState('');
+          const [currentTime, setCurrentTime] = useState(new Date());
+
+          useEffect(() => {
+            const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+            return () => clearInterval(timer);
+          }, []);
+
+          const newsFeed = generateDynamicNews(currentTime);
+
+          const copyToClipboard = (text) => {
+            try {
+              const textArea = document.createElement("textarea");
+              textArea.value = text;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              
+              const toast = document.getElementById('toast');
+              if (toast) {
+                toast.classList.remove('hidden');
+                toast.classList.add('flex');
+                setTimeout(() => {
+                  toast.classList.add('hidden');
+                  toast.classList.remove('flex');
+                }, 2500);
+              }
+            } catch (err) {
+              console.error('Fallo al copiar:', err);
+            }
+          };
+
+          const renderContent = () => {
+            switch (activeTab) {
+              case 'home':
+                return (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
+                    <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden border border-white/10">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+                      <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-[60px] -ml-24 -mb-24"></div>
+                      
+                      <div className="flex items-center gap-2.5 mb-6 bg-red-500/20 w-fit px-4 py-1.5 rounded-full border border-red-500/30 backdrop-blur-md">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                        <span className="text-[10px] font-black text-red-100 tracking-widest uppercase">Estado: Conflicto Activo Total</span>
+                      </div>
+                      
+                      <h2 className="text-3xl md:text-4xl font-black mb-4 leading-[1.1] tracking-tight">
+                        Defensa de la Profesión Médica.<br/>
+                        <span className="text-blue-300">Dignidad o Éxodo.</span>
+                      </h2>
+                      <p className="text-slate-300 text-sm mb-8 leading-relaxed max-w-lg text-justify font-medium">
+                        Plataforma técnica para facultativos y especialistas. El arsenal con 100 argumentos de trinchera para combatir falacias y las 25 demandas innegociables del Estatuto Médico Propio.
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <button onClick={() => setActiveTab('demandas')} className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95">
+                          <ListChecks className="w-5 h-5" /> Demandas (25)
+                        </button>
+                        <button onClick={() => setActiveTab('argumentos')} className="bg-white/10 hover:bg-white/20 text-white font-bold py-3.5 px-6 rounded-2xl border border-white/20 backdrop-blur-sm transition-all flex items-center justify-center gap-2 active:scale-95">
+                          <Shield className="w-5 h-5" /> 100 Argumentos
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative group">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                          <Activity className="w-4 h-4 text-blue-500" /> Dialéctica para el Paciente
+                        </h3>
+                        <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-black tracking-wider">LA CLAVE</span>
+                      </div>
+                      <p className="text-slate-700 italic text-base leading-relaxed mb-4 text-justify">
+                        "Si los servicios mínimos son del 100%, la administración reconoce jurídicamente que el sistema sobrevive bajo mínimos todos los días laborables del año. Esta huelga exige condiciones biológicas para no cometer errores mortales por agotamiento en el quirófano. Curamos hoy el sistema con esta huelga para poder operarte con seguridad mañana."
+                      </p>
+                      <button 
+                        onClick={() => copyToClipboard("Si los servicios mínimos son del 100%, la administración reconoce jurídicamente que el sistema sobrevive bajo mínimos todos los días laborables del año. Esta huelga exige condiciones biológicas para no cometer errores mortales por agotamiento en el quirófano. Curamos hoy el sistema con esta huelga para poder operarte con seguridad mañana.")}
+                        className="w-full bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 font-black py-3.5 rounded-xl border border-slate-200 transition-colors flex items-center justify-center gap-2 text-xs uppercase tracking-widest"
+                      >
+                        <Share2 className="w-4 h-4" /> Copiar para redes sociales
+                      </button>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center px-1">
+                        <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Cronología de Hoy</h3>
+                        <button onClick={() => setActiveTab('noticias')} className="text-[10px] font-black text-blue-600 hover:underline tracking-widest uppercase">Ver Diario Completo</button>
+                      </div>
+                      <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:border-blue-300 transition-colors cursor-pointer group" onClick={() => setActiveTab('noticias')}>
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="bg-red-50 text-red-600 border border-red-100 text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-widest shadow-sm">{newsFeed[0].tag}</span>
+                          <span className="text-[10px] text-slate-400 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">{newsFeed[0].date}</span>
+                        </div>
+                        <h4 className="font-extrabold text-slate-800 text-lg mb-2 leading-tight group-hover:text-blue-700 transition-colors">{newsFeed[0].title}</h4>
+                        <p className="text-slate-500 text-sm line-clamp-2 leading-relaxed text-justify">{newsFeed[0].summary}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+
+              case 'demandas':
+                const filteredDemands = demands.filter(d => d.title.toLowerCase().includes(searchQuery.toLowerCase()) || d.description.toLowerCase().includes(searchQuery.toLowerCase()));
+                return (
+                  <div className="space-y-6 animate-in fade-in duration-300 pb-24">
+                    <header className="px-1 text-center sm:text-left mb-6">
+                      <span className="text-blue-600 text-[10px] font-black tracking-[0.3em] uppercase block mb-2">Estructura Irrenunciable</span>
+                      <h2 className="text-3xl font-black text-slate-900 mb-3 tracking-tight">Las 25 Demandas del Estatuto</h2>
+                      <p className="text-slate-500 text-sm font-medium leading-relaxed text-justify sm:text-left">
+                        Rebatidas punto por punto. Plataforma oficial de mínimos para abandonar la precariedad estructural de la Ley 55/2003 impuesta por los sindicatos de clase.
+                      </p>
+                    </header>
+
+                    <div className="relative shadow-sm">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                      <input 
+                        type="text" 
+                        placeholder="Filtrar exigencias (ej. MIR, 24h, Jubilación...)" 
+                        className="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-5">
+                      {filteredDemands.map(demand => (
+                        <div key={demand.id} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-md hover:border-blue-400 transition-all group">
+                          <div className="flex items-start gap-4 mb-3">
+                            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 group-hover:bg-blue-50 group-hover:scale-110 transition-all flex-shrink-0">
+                              {demand.icon}
+                            </div>
+                            <div className="pt-1">
+                              <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">{demand.category}</span>
+                              <h3 className="text-lg font-bold text-slate-800 leading-tight mt-2">{demand.title}</h3>
+                            </div>
+                          </div>
+                          <p className="text-slate-600 text-sm leading-relaxed text-justify ml-16 sm:ml-0">{demand.description}</p>
+                        </div>
+                      ))}
+                      {filteredDemands.length === 0 && (
+                        <div className="text-center py-10 bg-white border border-slate-200 rounded-3xl">
+                          <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                          <p className="text-slate-500 font-bold">Ninguna demanda coincide con los términos de búsqueda.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+
+              case 'argumentos':
+                const filteredArgs = argumentsList.filter(a => a.q.toLowerCase().includes(searchQuery.toLowerCase()) || a.a.toLowerCase().includes(searchQuery.toLowerCase()));
+                return (
+                  <div className="space-y-6 animate-in fade-in duration-300 pb-24">
+                    <header className="bg-gradient-to-br from-slate-900 to-indigo-900 p-6 rounded-3xl shadow-lg border border-slate-700 text-white relative overflow-hidden mb-8">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-[40px] -mr-16 -mt-16"></div>
+                      <h2 className="text-2xl font-black mb-3">Los 100 Argumentos de Trinchera</h2>
+                      <p className="text-slate-300 text-sm font-medium leading-relaxed text-justify">
+                        <strong>Tu escudo dialéctico.</strong> Un arsenal con exactamente 100 respuestas contundentes, jurídicas y basadas en la evidencia médica. Diseñado para desmontar instantáneamente cualquier falacia gerencial, presión política o trampa mediática en los medios de comunicación.
+                      </p>
+                      <div className="mt-4 flex items-center gap-2">
+                        <span className="bg-blue-600 text-white text-[10px] font-black px-3 py-1 rounded-full tracking-widest shadow-sm">100 / 100 CARGADOS</span>
+                      </div>
+                    </header>
+
+                    <div className="relative shadow-sm">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                      <input 
+                        type="text" 
+                        placeholder="Busca por palabra clave (ej. Telemedicina, Cirugía, Riesgo...)" 
+                        className="w-full bg-white border border-slate-300 rounded-2xl py-4 pl-12 pr-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-medium"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      {filteredArgs.map((arg, idx) => (
+                        <AccordionItem key={arg.id} question={`${arg.id}. ${arg.q}`} answer={arg.a} category={arg.category} onCopy={copyToClipboard} />
+                      ))}
+                      {filteredArgs.length === 0 && (
+                        <div className="text-center py-10 bg-white border border-slate-200 rounded-3xl">
+                          <p className="text-slate-500 font-bold">No se encontraron argumentos de esa temática en la trinchera.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+
+              case 'noticias':
+                return (
+                  <div className="space-y-6 animate-in fade-in duration-300 pb-24">
+                    <header className="px-1 flex flex-col mb-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Cuaderno de Bitácora</h2>
+                        <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100 flex items-center gap-1.5 shadow-sm">
+                          <Clock className="w-3 h-3" /> ACTUALIZACIÓN DINÁMICA
+                        </span>
+                      </div>
+                      <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                        Registro cronológico de la lucha médica y resoluciones autonómicas, evaluado cada 24 horas.
+                      </p>
+                    </header>
+
+                    <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-blue-600 before:via-slate-200 before:to-transparent">
+                      {newsFeed.map((news, index) => (
+                        <div key={news.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group pb-2">
+                          <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-50 bg-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-transform ${index === 0 ? 'ring-4 ring-blue-100 animate-pulse' : 'group-hover:scale-110'}`}>
+                            <div className={`w-3.5 h-3.5 rounded-full ${index === 0 ? 'bg-blue-600' : 'bg-slate-300'}`}></div>
+                          </div>
+                          <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all">
+                            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                              <span className={`text-[9px] font-black px-2 py-1 rounded-md uppercase tracking-widest shadow-sm ${
+                                news.color === 'red' ? 'bg-red-50 text-red-600 border border-red-100' : 
+                                news.color === 'blue' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 
+                                news.color === 'amber' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
+                                'bg-slate-50 text-slate-600 border border-slate-100'
+                              }`}>
+                                {news.tag}
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-md border border-slate-100">
+                                {news.date}
+                              </span>
+                            </div>
+                            <h4 className="font-extrabold text-slate-800 text-lg mb-3 leading-tight">{news.title}</h4>
+                            <p className="text-slate-600 text-sm leading-relaxed mb-5 text-justify">{news.summary}</p>
+                            <a 
+                              href={news.link} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="flex items-center gap-2 text-blue-600 text-[10px] font-black hover:text-blue-800 uppercase tracking-widest group-hover:gap-3 transition-all"
+                            >
+                              Ampliar noticia en {news.source} <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+
+              default:
+                return null;
+            }
+          };
+
+          return (
+            <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-200 selection:text-blue-900">
+              <header className="bg-white/85 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 px-5 py-4 flex items-center justify-between shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="bg-slate-900 p-2.5 rounded-2xl shadow-lg border border-slate-700">
+                    <ShieldAlert className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h1 className="font-black text-xl tracking-tighter leading-none mb-0.5">
+                      Defensa<span className="text-blue-600">Médica</span>
+                    </h1>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Huelga 2026</p>
+                  </div>
+                </div>
+                <div className="hidden md:flex gap-4">
+                  <span className="text-[10px] font-black text-slate-400 flex items-center gap-1.5 uppercase tracking-widest bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                    <Activity className="w-3 h-3 text-red-500 animate-pulse" /> Monitorización Global Activa
+                  </span>
+                </div>
+              </header>
+
+              <main className="max-w-3xl mx-auto px-4 pt-6 md:pt-10">
+                {renderContent()}
+              </main>
+
+              <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/95 backdrop-blur-xl border border-slate-700 rounded-full px-6 py-2.5 shadow-2xl z-50 flex items-center gap-6 md:gap-10 pb-safe">
+                {[
+                  { id: 'home', icon: Stethoscope, label: 'Inicio' },
+                  { id: 'demandas', icon: ListChecks, label: 'Las 25 Demandas' },
+                  { id: 'argumentos', icon: Shield, label: '100 Argumentos' },
+                  { id: 'noticias', icon: Newspaper, label: 'Actualidad' }
+                ].map((tab) => (
+                  <button 
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); setSearchQuery(''); }}
+                    className={`flex flex-col items-center gap-1 transition-all relative outline-none p-1.5 ${activeTab === tab.id ? 'text-blue-400 scale-110' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    <tab.icon className="w-[22px] h-[22px]" strokeWidth={activeTab === tab.id ? 2.5 : 2} />
+                    <span className="text-[8px] font-black uppercase tracking-widest">{tab.label}</span>
+                    {activeTab === tab.id && <span className="absolute -bottom-1.5 w-6 h-1 bg-blue-500 rounded-full blur-[2px] shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>}
+                  </button>
+                ))}
+              </nav>
+
+              <div id="toast" className="hidden fixed top-24 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-2xl shadow-2xl items-center gap-3 z-[100] animate-in slide-in-from-top-10 border border-slate-700 transition-opacity">
+                <div className="bg-emerald-500/20 p-1.5 rounded-full border border-emerald-500/50">
+                  <ListChecks className="w-4 h-4 text-emerald-400" />
+                </div>
+                <span className="font-bold text-sm tracking-wide">Copiado de forma segura al portapapeles</span>
+              </div>
+            </div>
+          );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
