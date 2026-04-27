@@ -66,16 +66,14 @@
             top: 0;
             bottom: 0;
             width: 40px;
-            background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.9));
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.95));
             pointer-events: none;
             z-index: 51;
-            border-top-right-radius: 1rem;
-            border-bottom-right-radius: 1rem;
             transition: opacity 0.3s ease;
         }
     </style>
 </head>
-<body class="font-sans antialiased text-primary pb-24 md:pb-0 selection:bg-action selection:text-white">
+<body class="font-sans antialiased text-primary selection:bg-action selection:text-white">
 
     <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[110] flex flex-col gap-2 pointer-events-none"></div>
 
@@ -93,17 +91,37 @@
         </div>
     </div>
 
-    <header class="hidden md:block sticky top-0 glass-nav z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="font-display font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-slate-600">MédicosInformados.</div>
-            <nav class="flex space-x-6 text-sm font-medium items-center">
-                <button onclick="nav('inicio')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="inicio">El Conflicto <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
-                <button onclick="nav('estatuto')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="estatuto">Estatuto Marco <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
-                <button onclick="nav('argumentario')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="argumentario">Argumentario <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
-                <button onclick="nav('actores')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="actores">Actores <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
-                <button onclick="nav('frases')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="frases">Frases <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
-                <button onclick="openGlobalSearch()" class="ml-4 flex items-center px-3 py-1.5 text-xs text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"><i data-lucide="search" class="w-3 h-3 mr-2"></i> Buscar <kbd class="ml-2 font-mono text-[10px] bg-white px-1 py-0.5 rounded border border-slate-200">Cmd K</kbd></button>
-            </nav>
+    <header class="sticky top-0 glass-nav z-50">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <!-- Barra superior -->
+            <div class="h-14 md:h-16 flex items-center justify-between border-b border-slate-100/50 md:border-none">
+                <div class="font-display font-bold text-lg md:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-slate-600">MédicosInformados.</div>
+                
+                <button onclick="openGlobalSearch()" class="md:hidden p-2 text-slate-500 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors"><i data-lucide="search" class="w-4 h-4"></i></button>
+
+                <nav class="hidden md:flex space-x-6 text-sm font-medium items-center">
+                    <button onclick="nav('inicio')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="inicio">El Conflicto <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
+                    <button onclick="nav('estatuto')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="estatuto">Estatuto Marco <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
+                    <button onclick="nav('argumentario')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="argumentario">Argumentario <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
+                    <button onclick="nav('actores')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="actores">Actores <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
+                    <button onclick="nav('frases')" class="nav-item relative py-2 text-slate-500 hover:text-primary transition-colors" data-target="frases">Frases <div class="nav-indicator absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-action to-rose-400 transform scale-x-0 transition-transform origin-left"></div></button>
+                    <button onclick="openGlobalSearch()" class="ml-4 flex items-center px-3 py-1.5 text-xs text-slate-500 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors border border-slate-200"><i data-lucide="search" class="w-3 h-3 mr-2"></i> Buscar <kbd class="ml-2 font-mono text-[10px] bg-white px-1 py-0.5 rounded border border-slate-200">Cmd K</kbd></button>
+                </nav>
+            </div>
+
+            <!-- Navegación Móvil (Scrollable) integrada en el header -->
+            <div class="md:hidden relative group nav-mask-right border-t border-slate-100/50" id="nav-wrapper">
+                <div id="nav-indicator-arrow" class="absolute right-0 top-1/2 -translate-y-1/2 z-[60] bg-gradient-to-l from-white via-white/80 to-transparent pl-8 pr-1 py-2 pointer-events-none transition-opacity duration-300">
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-action animate-pulse"></i>
+                </div>
+                <nav id="mobile-nav" class="flex overflow-x-auto no-scrollbar items-center space-x-1 text-sm font-medium py-2.5 scroll-smooth snap-x" onscroll="updateNavIndicator(this)">
+                    <button onclick="nav('inicio')" class="nav-item-mobile snap-start whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-500 hover:text-primary transition-colors font-semibold text-xs" data-target="inicio">Inicio</button>
+                    <button onclick="nav('estatuto')" class="nav-item-mobile snap-start whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-500 hover:text-primary transition-colors font-semibold text-xs" data-target="estatuto">Estatuto</button>
+                    <button onclick="nav('argumentario')" class="nav-item-mobile snap-start whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-500 hover:text-primary transition-colors font-semibold text-xs" data-target="argumentario">Argumentario</button>
+                    <button onclick="nav('actores')" class="nav-item-mobile snap-start whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-500 hover:text-primary transition-colors font-semibold text-xs" data-target="actores">Actores</button>
+                    <button onclick="nav('frases')" class="nav-item-mobile snap-start whitespace-nowrap px-3 py-1.5 rounded-lg text-slate-500 hover:text-primary transition-colors font-semibold text-xs" data-target="frases">Frases</button>
+                </nav>
+            </div>
         </div>
     </header>
 
@@ -290,37 +308,6 @@
         </div>
     </footer>
 
-    <div class="md:hidden fixed bottom-4 left-4 right-4 z-50">
-        <div class="relative group nav-mask-right" id="nav-wrapper">
-            <div id="nav-indicator-arrow" class="absolute right-2 top-1/2 -translate-y-1/2 z-[60] bg-action text-white p-1 rounded-full shadow-lg animate-pulse pointer-events-none transition-opacity duration-300">
-                <i data-lucide="chevron-right" class="w-3 h-3"></i>
-            </div>
-            
-            <nav id="mobile-nav" class="glass-nav-dark rounded-2xl flex items-center h-16 w-full px-2 overflow-x-auto no-scrollbar snap-x scroll-smooth shadow-2xl" onscroll="updateNavIndicator(this)">
-                <div class="flex items-center min-w-max h-full">
-                    <button onclick="nav('inicio')" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-slate-400 hover:text-white transition-colors relative" data-target="inicio">
-                        <i data-lucide="home" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Inicio</span><div class="nav-dot absolute top-2 right-4 w-1.5 h-1.5 bg-rose-500 rounded-full opacity-0 transition-opacity"></div>
-                    </button>
-                    <button onclick="nav('estatuto')" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-slate-400 hover:text-white transition-colors relative" data-target="estatuto">
-                        <i data-lucide="book-open" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Estatuto</span><div class="nav-dot absolute top-2 right-4 w-1.5 h-1.5 bg-rose-500 rounded-full opacity-0 transition-opacity"></div>
-                    </button>
-                    <button onclick="nav('argumentario')" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-slate-400 hover:text-white transition-colors relative" data-target="argumentario">
-                        <i data-lucide="shield" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Defensa</span><div class="nav-dot absolute top-2 right-4 w-1.5 h-1.5 bg-rose-500 rounded-full opacity-0 transition-opacity"></div>
-                    </button>
-                    <button onclick="nav('actores')" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-slate-400 hover:text-white transition-colors relative" data-target="actores">
-                        <i data-lucide="users" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Actores</span><div class="nav-dot absolute top-2 right-4 w-1.5 h-1.5 bg-rose-500 rounded-full opacity-0 transition-opacity"></div>
-                    </button>
-                    <button onclick="nav('frases')" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-slate-400 hover:text-white transition-colors relative" data-target="frases">
-                        <i data-lucide="message-square" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Frases</span><div class="nav-dot absolute top-2 right-4 w-1.5 h-1.5 bg-rose-500 rounded-full opacity-0 transition-opacity"></div>
-                    </button>
-                    <button onclick="openGlobalSearch()" class="nav-item-mobile snap-start flex flex-col items-center justify-center min-w-[72px] h-full text-accent hover:text-blue-400 transition-colors relative">
-                        <i data-lucide="search" class="w-5 h-5 mb-1 transition-transform duration-300"></i><span class="text-[10px] font-medium tracking-wide">Buscar</span>
-                    </button>
-                </div>
-            </nav>
-        </div>
-    </div>
-
     <div id="pocketModal" class="fixed inset-0 z-[100] hidden flex-col justify-center px-6 md:px-20 py-10 transition-opacity bg-slate-900 bg-mesh">
         <button onclick="closePocketMode()" class="absolute top-6 right-6 text-white/50 hover:text-white bg-white/10 rounded-full p-2 backdrop-blur-md transition-all"><i data-lucide="x" class="w-6 h-6"></i></button>
         <div class="max-w-4xl mx-auto w-full">
@@ -371,21 +358,20 @@
             const target = document.getElementById(sectionId);
             if(target) { target.classList.remove('hidden'); void target.offsetWidth; target.classList.add('animate-fade-in'); }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            
             document.querySelectorAll('.nav-item').forEach(el => {
                 const ind = el.querySelector('.nav-indicator');
                 if(el.dataset.target === sectionId) { el.classList.add('text-primary', 'font-bold'); el.classList.remove('text-slate-500'); if(ind) ind.classList.remove('scale-x-0'); } 
                 else { el.classList.remove('text-primary', 'font-bold'); el.classList.add('text-slate-500'); if(ind) ind.classList.add('scale-x-0'); }
             });
+
             document.querySelectorAll('.nav-item-mobile').forEach(el => {
-                const icon = el.querySelector('svg') || el.querySelector('i'), dot = el.querySelector('.nav-dot');
                 if(el.dataset.target === sectionId) { 
-                    el.classList.replace('text-slate-400', 'text-white'); 
-                    if(icon) icon.classList.add('-translate-y-1', 'text-action'); 
-                    if(dot) dot.classList.replace('opacity-0', 'opacity-100'); 
+                    el.classList.add('bg-rose-50', 'text-action'); 
+                    el.classList.remove('text-slate-500'); 
                 } else { 
-                    el.classList.replace('text-white', 'text-slate-400'); 
-                    if(icon) icon.classList.remove('-translate-y-1', 'text-action'); 
-                    if(dot) dot.classList.replace('opacity-100', 'opacity-0'); 
+                    el.classList.remove('bg-rose-50', 'text-action'); 
+                    el.classList.add('text-slate-500'); 
                 }
             });
             
