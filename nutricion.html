@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#4a7050">
+<title>Plan Nutricional · Noemi</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  background:#f2f7f2;
+  color:#1e2d1f;
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button{cursor:pointer;font-family:inherit;border:none;background:none;-webkit-tap-highlight-color:transparent}
+
+/* HEADER */
+header{
+background:linear-gradient(135deg,#3a5f40 0%,#5a8f60 60%,#7ab87e 100%);
+padding:16px 18px 14px;
+position:sticky;top:0;z-index:200;
+box-shadow:0 2px 16px rgba(40,80,44,.35);
+}
+.hdr{display:flex;align-items:center;gap:12px;max-width:640px;margin:0 auto}
+.hdr-ico{
+width:46px;height:46px;border-radius:50%;
+background:rgba(255,255,255,.22);
+display:flex;align-items:center;justify-content:center;
+font-size:1.5rem;flex-shrink:0;
+}
+.hdr-t{color:#fff}
+.hdr-t h1{font-size:1.2rem;font-weight:800;letter-spacing:-.3px;line-height:1.2}
+.hdr-t p{font-size:.72rem;opacity:.82;margin-top:2px}
+
+/* TABS */
+.tabs{
+background:#fff;
+border-bottom:2px solid #ddeedd;
+position:sticky;top:77px;z-index:190;
+box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.tabs-inner{display:flex;max-width:640px;margin:0 auto}
+.tab{
+flex:1;padding:13px 4px;
+font-size:.8rem;font-weight:700;
+color:#888;
+border-bottom:3px solid transparent;
+transition:color .18s,border-color .18s,background .18s;
+display:flex;align-items:center;justify-content:center;gap:5px;
+}
+.tab.on{color:#3a5f40;border-bottom-color:#3a5f40}
+.tab:active{background:#f2f7f2}
+
+/* PANES */
+.pane{display:none}
+.pane.on{display:block}
+.wrap{max-width:640px;margin:0 auto;padding:16px 13px 80px}
+
+/* HERO */
+.hero{
+background:linear-gradient(135deg,#3a5f40,#5a8f60);
+border-radius:18px;padding:18px 18px 14px;
+color:#fff;margin-bottom:16px;
+display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.hero-day{font-size:1.4rem;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+.hero-date{font-size:.76rem;opacity:.82;margin-top:4px}
+.hero-badge{
+background:rgba(255,255,255,.22);border-radius:10px;
+padding:8px 12px;font-size:.7rem;font-weight:800;
+text-transform:uppercase;letter-spacing:.5px;
+flex-shrink:0;text-align:center;white-space:nowrap;
+}
+
+/* DAY NAV */
+.daynav{
+display:flex;gap:6px;margin-bottom:16px;
+overflow-x:auto;padding-bottom:2px;
+-webkit-overflow-scrolling:touch;
+scrollbar-width:none;
+}
+.daynav::-webkit-scrollbar{display:none}
+.daypill{
+flex-shrink:0;padding:8px 14px;border-radius:50px;
+font-size:.78rem;font-weight:700;
+background:#fff;color:#888;
+border:2px solid #ddeedd;
+white-space:nowrap;
+}
+.daypill.on{background:#3a5f40;color:#fff;border-color:#3a5f40}
+
+/* CARDS */
+.cards{display:flex;flex-direction:column;gap:10px}
+.card{
+background:#fff;border-radius:14px;
+box-shadow:0 2px 12px rgba(58,95,64,.1);
+overflow:hidden;
+}
+.card-hd{
+display:flex;align-items:center;gap:12px;
+padding:14px 16px;cursor:pointer;
+user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.card-ico{
+width:44px;height:44px;border-radius:12px;
+display:flex;align-items:center;justify-content:center;
+font-size:1.35rem;flex-shrink:0;
+}
+.c1{background:#e4f2e6}.c2{background:#fff4e4}
+.c3{background:#e4eef9}.c4{background:#fde8ef}.c5{background:#f0e8f8}
+.card-info{flex:1;min-width:0}
+.card-lbl{font-size:.66rem;font-weight:800;color:#5a8f60;text-transform:uppercase;letter-spacing:.7px}
+.card-name{font-size:.92rem;font-weight:700;margin-top:2px;line-height:1.3;color:#1e2d1f}
+.card-arr{font-size:1rem;color:#aaa;transition:transform .2s;flex-shrink:0}
+.card.open .card-arr{transform:rotate(180deg)}
+.card-bd{
+display:none;padding:4px 16px 16px;
+border-top:1px solid #eef5ee;
+}
+.card.open .card-bd{display:block;animation:fd .18s ease}
+@keyframes fd{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+.dtxt{font-size:.84rem;color:#555;line-height:1.65;margin-top:10px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pill{
+display:inline-flex;align-items:center;gap:4px;
+background:#e4f2e6;color:#3a5f40;
+border-radius:20px;padding:5px 11px;
+font-size:.72rem;font-weight:700;
+}
+
+/* BREAKFAST */
+.bf-hint{font-size:.78rem;color:#999;padding:10px 0 5px}
+.bf-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.bfopt{
+border:2px solid #ddeedd;border-radius:12px;
+padding:12px 13px;cursor:pointer;
+background:#f8fbf8;
+-webkit-tap-highlight-color:transparent;
+}
+.bfopt.on{border-color:#3a5f40;background:#e8f5e9}
+.bfopt-t{font-weight:700;font-size:.88rem;color:#1e2d1f}
+.bfopt-s{font-size:.74rem;color:#888;margin-top:3px}
+.recipe{display:none;margin-top:11px;background:#fff;border-radius:10px;padding:13px;border:1px solid #ddeedd}
+.bfopt.on .recipe{display:block}
+.rl{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
+.rl-i{color:#c07030}.rl-s{color:#3a5f40}
+.itags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.itag{background:#fff7f0;border:1px solid #f0d0a0;color:#c07030;border-radius:20px;padding:4px 9px;font-size:.73rem;font-weight:600}
+.slist{list-style:none}
+.slist li{display:flex;gap:9px;margin-bottom:8px;font-size:.81rem;color:#555;line-height:1.45}
+.snum{flex-shrink:0;width:22px;height:22px;background:#c8e6c9;color:#2e7d32;border-radius:50%;font-size:.68rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+
+/* FREE */
+.freebox{background:linear-gradient(135deg,#fff8f0,#ffeedd);border:2px dashed #e8a060;border-radius:12px;padding:22px 18px;text-align:center;margin-top:8px}
+.freebox .big{font-size:2.2rem}
+.freebox h3{font-size:1.1rem;font-weight:800;color:#c07030;margin-top:8px}
+.freebox p{color:#999;font-size:.82rem;margin-top:5px}
+
+/* TIP */
+.tip{background:#e8f5e9;border-left:4px solid #5a8f60;border-radius:8px;padding:11px 13px;font-size:.78rem;color:#2e6030;line-height:1.5;margin-top:11px}
+
+/* BADGE */
+.bdg{background:#e07030;color:#fff;padding:2px 8px;border-radius:20px;font-size:.66rem;font-weight:800;margin-left:6px;vertical-align:middle}
+
+/* PLANNING */
+.stitle{font-size:1.05rem;font-weight:800;color:#3a5f40;margin:22px 0 11px;display:flex;align-items:center;gap:7px}
+.stitle:first-child{margin-top:0}
+.icard{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(58,95,64,.09);padding:13px 15px;margin-bottom:9px;font-size:.84rem;color:#555;line-height:1.65}
+.icard strong{color:#1e2d1f}
+.wscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.wgrid{display:grid;grid-template-columns:repeat(7,minmax(88px,1fr));gap:4px;min-width:600px}
+.wdh{background:#3a5f40;color:#fff;text-align:center;padding:7px 4px;border-radius:9px 9px 0 0;font-size:.66rem;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.wcell{background:#fff;border:1px solid #ddeedd;padding:7px 6px;font-size:.7rem;color:#555;min-height:55px;line-height:1.4}
+.wcell:last-child{border-radius:0 0 9px 9px}
+.wlbl{font-size:.6rem;font-weight:800;color:#5a8f60;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.wlibre{background:#fff8f0;color:#c07030;font-weight:800;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dcard{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(58,95,64,.09);padding:12px 13px}
+.dday{font-size:.66rem;font-weight:800;color:#5a8f60;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.dcard p{font-size:.8rem;color:#555;line-height:1.5}
+.full{grid-column:1/-1}
+
+/* PORTIONS */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pcard{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(58,95,64,.09);padding:13px 14px;display:flex;align-items:center;gap:11px}
+.pico{font-size:1.6rem;flex-shrink:0}
+.ptyp{font-size:.7rem;color:#888;font-weight:600}
+.pamt{font-size:.98rem;font-weight:800;margin-top:2px;color:#1e2d1f}
+.sbf{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(58,95,64,.09);padding:14px 15px;font-size:.84rem;color:#888;line-height:1.6}
+
+@media(max-width:420px){
+.hdr-t h1{font-size:1.05rem}
+.tabs{top:73px}
+.dgrid{grid-template-columns:1fr}
+}
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="hdr">
+    <div class="hdr-ico">&#x1F957;</div>
+    <div class="hdr-t">
+      <h1>Plan Nutricional &middot; Noemi</h1>
+      <p>&#x1F4C5; Programa personalizado &middot; 30/03/2026</p>
+    </div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tabs-inner">
+    <button class="tab on" data-tab="agenda">&#x1F4C6; Agenda</button>
+    <button class="tab"    data-tab="planning">&#x1F4CB; Planning</button>
+    <button class="tab"    data-tab="porciones">&#x2696;&#xFE0F; Porciones</button>
+  </div>
+</div>
+
+<!-- AGENDA -->
+
+<div class="pane on" id="pane-agenda">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <div class="hero-day"  id="hDay">&#x2014;</div>
+        <div class="hero-date" id="hDate">&#x2014;</div>
+      </div>
+      <div class="hero-badge" id="hBadge">&#x1F4C6;</div>
+    </div>
+    <div class="daynav"  id="dayNav"></div>
+    <div class="cards"   id="cardList"></div>
+  </div>
+</div>
+
+<!-- PLANNING -->
+
+<div class="pane" id="pane-planning">
+  <div class="wrap">
+
+```
+<div class="stitle">&#x1F305; Ingesta n&ordm;1 &middot; Matcha &amp; Entreno</div>
+<div class="icard">&#x2615; <strong>Matcha + Entrenamiento</strong> &mdash; Todos los d&iacute;as. Esta toma va ligada al entreno, antes o durante.</div>
+
+<div class="stitle">&#x1F964; Ingesta n&ordm;2 &middot; Desayuno</div>
+<div class="icard">
+  Rotaci&oacute;n <strong>cada 2 d&iacute;as</strong> entre tres opciones:<br><br>
+  &#x1F9C3; <strong>Batido detox</strong> &mdash; Pi&ntilde;a &middot; Apio &middot; Pepino &middot; Jengibre &middot; Espinaca<br>
+  &#x1F376; <strong>Dos yogures</strong> &mdash; Ch&iacute;a &middot; Lino &middot; A&ccedil;a&iacute;<br>
+  &#x1F353; <strong>Fruta bajo &iacute;ndice gluc&eacute;mico</strong> + Yogurt
+</div>
+
+<div class="stitle">&#x1F37D;&#xFE0F; Ingesta n&ordm;3 &middot; Comida</div>
+<div class="wscroll">
+  <div class="wgrid">
+    <div>
+      <div class="wdh">Lun</div>
+      <div class="wcell"><div class="wlbl">Base</div>Arroz integral 50-25-15g &middot; caldo, ajo, piment&oacute;n, sofrito</div>
+      <div class="wcell"><div class="wlbl">Plato</div>Mix verduras teriyaki + huevo roto &#x1F95A;</div>
+    </div>
+    <div>
+      <div class="wdh">Mar</div>
+      <div class="wcell"><div class="wlbl">Base</div>Arroz integral 50-25-15g</div>
+      <div class="wcell"><div class="wlbl">Plato</div>Pechuga pollo/pavo + verdura anterior &#x1F357;</div>
+    </div>
+    <div>
+      <div class="wdh">Mi&eacute;</div>
+      <div class="wcell"><div class="wlbl">Base</div>Pasta lentejas 80-50-30g</div>
+      <div class="wcell"><div class="wlbl">Plato</div>Merluza salsa verde + esp&aacute;rragos &#x1F41F;</div>
+    </div>
+    <div>
+      <div class="wdh">Jue</div>
+      <div class="wcell"><div class="wlbl">Base</div>Pasta lentejas 80-50-30g</div>
+      <div class="wcell"><div class="wlbl">Plato</div>Pesto + huevo frito + at&uacute;n &#x1F957;</div>
+    </div>
+    <div>
+      <div class="wdh">Vie</div>
+      <div class="wcell"><div class="wlbl">Base</div>Pasta lentejas 80-50-30g</div>
+      <div class="wcell"><div class="wlbl">Plato</div>Bolo&ntilde;esa &#x1F35D;</div>
+    </div>
+    <div>
+      <div class="wdh">S&aacute;b</div>
+      <div class="wcell"><div class="wlbl">Base</div>Pasta lentejas 80-50-30g</div>
+      <div class="wcell"><div class="wlbl">Plato</div>Pollo troceado especiado + verduritas &#x1F371;</div>
+    </div>
+    <div>
+      <div class="wdh">Dom</div>
+      <div class="wcell wlibre" style="min-height:110px">&#x1F389;<br>LIBRE</div>
+      <div class="wcell wlibre">&#x2728;<br>LIBRE</div>
+    </div>
+  </div>
+</div>
+
+<div class="stitle">&#x1F36B; Ingesta n&ordm;4 &middot; Merienda</div>
+<div class="icard">&#x1F36B; <strong>Mousse de chocolate</strong> (enlace en tu plan)<br>&#x1F952; <strong>Tostadas de calabac&iacute;n</strong> (enlace en tu plan)</div>
+
+<div class="stitle">&#x1F319; Ingesta n&ordm;5 &middot; Cena</div>
+<div class="dgrid">
+  <div class="dcard"><div class="dday">Lunes</div><p>&#x1F383; Crema de calabaza y zanahoria (sin patata)</p></div>
+  <div class="dcard"><div class="dday">Martes</div><p>&#x1F354; Hamburguesa de ternera + Crema de calabaza</p></div>
+  <div class="dcard"><div class="dday">Mi&eacute;rcoles</div><p>&#x1F355; Pizza <span class="bdg">LIBRE</span></p></div>
+  <div class="dcard"><div class="dday">Jueves</div><p>&#x1F41F; Bacalao plancha + Pur&eacute; patata + Esp&aacute;rragos</p></div>
+  <div class="dcard"><div class="dday">Viernes</div><p>&#x1F969; Carne/Pescado/Huevo + Verdura (sin postre)</p></div>
+  <div class="dcard"><div class="dday">S&aacute;bado</div><p>&#x1F372; Hervido valenciano</p></div>
+  <div class="dcard full"><div class="dday">Domingo</div><p>&#x1F35C; Ramen</p></div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- PORCIONES -->
+
+<div class="pane" id="pane-porciones">
+  <div class="wrap">
+
+```
+<div class="stitle" style="margin-top:0">&#x2696;&#xFE0F; Prote&iacute;nas</div>
+<div class="pgrid">
+  <div class="pcard"><div class="pico">&#x1F357;</div><div><div class="ptyp">Carne blanca</div><div class="pamt">150&ndash;180 g</div></div></div>
+  <div class="pcard"><div class="pico">&#x1F969;</div><div><div class="ptyp">Carne roja</div><div class="pamt">120&ndash;160 g</div></div></div>
+  <div class="pcard"><div class="pico">&#x1F41F;</div><div><div class="ptyp">Pescado blanco</div><div class="pamt">140&ndash;160 g</div></div></div>
+  <div class="pcard"><div class="pico">&#x1F420;</div><div><div class="ptyp">Pescado azul</div><div class="pamt">150 g</div></div></div>
+</div>
+<div class="tip" style="margin-top:11px">&#x1F966; <strong>Verduras y hortalizas: &iexcl;ILIMITADAS!</strong></div>
+
+<div class="stitle">&#x1F35A; Carbohidratos</div>
+<div class="pgrid">
+  <div class="pcard"><div class="pico">&#x1F35A;</div><div><div class="ptyp">Arroz integral</div><div class="pamt">50/25/15 g</div></div></div>
+  <div class="pcard"><div class="pico">&#x1F35D;</div><div><div class="ptyp">Pasta lentejas</div><div class="pamt">80/50/30 g</div></div></div>
+</div>
+<div class="tip">&#x2139;&#xFE0F; Las cantidades var&iacute;an seg&uacute;n el d&iacute;a y actividad f&iacute;sica.</div>
+
+<div class="stitle">&#x1F964; Mi desayuno elegido</div>
+<div class="sbf" id="savedBf">A&uacute;n no has elegido desayuno. Ve a Agenda y selecciona el tuyo &#x1F446;</div>
+```
+
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+var DS=['Domingo','Lunes','Martes','Mi\u00e9rcoles','Jueves','Viernes','S\u00e1bado'];
+var DS2=['Dom','Lun','Mar','Mi\u00e9','Jue','Vie','S\u00e1b'];
+
+var BF=[
+  {id:'b1',e:'\ud83e\udd5a',t:'Tortilla de claras, queso sin lactosa y nueces',s:'Ligera \u00b7 Alta prote\u00edna \u00b7 Sin lactosa',
+   i:['Clara de huevo','Sal de mesa','Nueces','Aceite de oliva','Queso de untar sin lactosa'],
+   p:['Bate las claras hasta que hagan espuma y a\u00f1\u00e1deles sal.',
+      'Calienta una sart\u00e9n con un poco de aceite de oliva.',
+      'Extiende las claras por la sart\u00e9n.',
+      'Cuando cuaje, dale la vuelta y cocina 1 minuto m\u00e1s.',
+      'Dobla la tortilla y a\u00f1ade el queso de untar y las nueces.']},
+  {id:'b2',e:'\ud83e\udd52',t:'Tortilla de calabac\u00edn, cebolla y queso de cabra',s:'Saciante \u00b7 Con verduras \u00b7 Mediterr\u00e1nea',
+   i:['Huevo crudo','Aceite de oliva','Sal de mesa','Calabac\u00edn','Queso de cabra tierno','Cebolla'],
+   p:['Calienta aceite en una sart\u00e9n.',
+      'Trocea peque\u00f1o la cebolla y el calabac\u00edn.',
+      'Rehoga la cebolla hasta que quede transparente.',
+      'A\u00f1ade el calabac\u00edn y dora ambas verduras.',
+      'Reserva y bate los huevos con sal, las verduras y el queso.',
+      'Vuelca en la sart\u00e9n y cuaja por ambos lados.']},
+  {id:'b3',e:'\ud83c\udf5e',t:'Tostada de reques\u00f3n, jam\u00f3n serrano, berenjena y nueces',s:'Completa \u00b7 Sabrosa \u00b7 Antiinflamatoria',
+   i:['Pan blanco','R\u00facula','Reques\u00f3n 0%','Mermelada de tomate y albahaca','Jam\u00f3n serrano','Berenjena','Nueces'],
+   p:['Corta la berenjena en rodajas.',
+      'H\u00e1zla a la plancha con un chorrito de aceite.',
+      'Tuesta el pan.',
+      'Unta el reques\u00f3n en la tostada.',
+      'A\u00f1ade berenjena, jam\u00f3n serrano y mermelada de tomate.',
+      'Termina con nueces y r\u00facula.']}
+];
+
+var MD={
+  0:{libre3:true,cena:{e:'\ud83c\udf5c',n:'Ramen',d:'Domingo libre: Ramen a tu gusto. \u00a1Disfruta!'}},
+  1:{comida:{e:'\ud83e\udd62',n:'Arroz integral + Mix verduras teriyaki + Huevo roto',d:'Arroz integral (50/25/15g) con pastilla de caldo, ajo y piment\u00f3n m\u00e1s sofrito de cebolla y tomate. Mix de verduras (calabac\u00edn, zanahoria, pimiento, bimi, champi\u00f1ones) con salsa teriyaki y huevo roto.'},
+     cena:{e:'\ud83c\udf83',n:'Crema de calabaza y zanahoria (sin patata)',d:'Crema de calabaza y zanahoria sin patata. Condimenta con c\u00faruma y un chorrito de aceite de oliva virgen extra.'}},
+  2:{comida:{e:'\ud83c\udf57',n:'Pechuga de pollo o pavo + verdura anterior',d:'Pechuga de pollo o pavo especiada acompa\u00f1ada de la verdura sobrante del lunes en menor cantidad. Base de arroz integral (50/25/15g).'},
+     cena:{e:'\ud83c\udf54',n:'Hamburguesa de ternera + Crema de calabaza',d:'Hamburguesa de ternera al plato (120-160g) acompa\u00f1ada de crema de calabaza y zanahoria.'}},
+  3:{comida:{e:'\ud83d\udc1f',n:'Merluza salsa verde + Esp\u00e1rragos + Verduras',d:'Merluza en salsa verde con esp\u00e1rragos y verduras del primer d\u00eda si te quedan. Base de pasta de lentejas (80/50/30g).'},
+     cena:{e:'\ud83c\udf55',n:'Pizza Libre',d:'\u00a1Cena libre! Disfruta de una pizza a tu elecci\u00f3n.',libre:true}},
+  4:{comida:{e:'\ud83e\udd57',n:'Pesto + Huevo frito + At\u00fan',d:'Pasta de lentejas (80/50/30g) con pesto, huevo frito y at\u00fan.'},
+     cena:{e:'\ud83d\udc1f',n:'Bacalao a la plancha + Pur\u00e9 de patata + Esp\u00e1rragos',d:'Bacalao a la plancha (140-160g) con pur\u00e9 de patata (permitido hoy) y esp\u00e1rragos.'}},
+  5:{comida:{e:'\ud83c\udf5d',n:'Bolo\u00f1esa',d:'Pasta de lentejas (80/50/30g) con salsa bolo\u00f1esa. Usa carne picada de ternera (120-160g).'},
+     cena:{e:'\ud83e\udd69',n:'Carne / Pescado / Huevo + Verdura (sin postre)',d:'Elige entre carne, pescado o huevo con verdura al gusto. Sin postre esta noche.'}},
+  6:{comida:{e:'\ud83c\udf71',n:'Pollo troceado especiado + Verduritas',d:'Pollo troceado y especiado con verduritas (suele venir en bandejas). Base de pasta de lentejas (80/50/30g).'},
+     cena:{e:'\ud83c\udf72',n:'Hervido valenciano',d:'Hervido valenciano: verduras de temporada, patata, jud\u00eda verde, zanahoria con aceite de oliva y sal.'}}
+};
+
+var selDay=new Date().getDay();
+var selBf=localStorage.getItem('nbf')||'';
+
+// TABS
+document.querySelectorAll('.tab').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=b.dataset.tab;
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+    document.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on');
+    document.getElementById('pane-'+t).classList.add('on');
+    if(t==='porciones')renderSaved();
+  });
+});
+
+function renderHero(){
+  var today=new Date().getDay();
+  var isT=selDay===today;
+  document.getElementById('hDay').textContent=(isT?'Hoy \u00b7 ':'')+DS[selDay];
+  document.getElementById('hBadge').textContent=isT?'\ud83d\udccd HOY':DS2[selDay];
+  var d=new Date();d.setDate(d.getDate()+(selDay-today));
+  document.getElementById('hDate').textContent=d.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+function renderNav(){
+  var nav=document.getElementById('dayNav');
+  nav.innerHTML='';
+  var today=new Date().getDay();
+  DS.forEach(function(d,i){
+    var b=document.createElement('button');
+    b.className='daypill'+(i===selDay?' on':'');
+    b.textContent=(i===today?'\ud83d\udccd ':'')+DS2[i];
+    b.addEventListener('click',function(){selDay=i;renderNav();renderHero();renderCards();});
+    nav.appendChild(b);
+  });
+}
+
+function tog(card){card.classList.toggle('open')}
+
+function mkCard(ci,ico,lbl,name,body){
+  var d=document.createElement('div');
+  d.className='card';
+  d.innerHTML='<div class="card-hd"><div class="card-ico '+ci+'">'+ico+'</div><div class="card-info"><div class="card-lbl">'+lbl+'</div><div class="card-name">'+name+'</div></div><div class="card-arr">\u2304</div></div><div class="card-bd">'+body+'</div>';
+  d.querySelector('.card-hd').addEventListener('click',function(){tog(d)});
+  return d;
+}
+
+function mkBfCard(){
+  var d=document.createElement('div');
+  d.className='card';
+  var opts=BF.map(function(b){
+    var sel=selBf===b.id;
+    var it=b.i.map(function(x){return'<span class="itag">\ud83e\udd44 '+x+'</span>'}).join('');
+    var st=b.p.map(function(s,k){return'<li><span class="snum">'+(k+1)+'</span><span>'+s+'</span></li>'}).join('');
+    return'<div class="bfopt'+(sel?' on':'')+'" data-bid="'+b.id+'"><div class="bfopt-t">'+b.e+' '+b.t+'</div><div class="bfopt-s">'+b.s+'</div><div class="recipe"><div class="rl rl-i">\ud83e\uddc2 Ingredientes</div><div class="itags">'+it+'</div><div class="rl rl-s">\ud83c\udf73 Paso a paso</div><ul class="slist">'+st+'</ul></div></div>';
+  }).join('');
+  d.innerHTML='<div class="card-hd"><div class="card-ico c2">\ud83e\udd64</div><div class="card-info"><div class="card-lbl">Ingesta n\u00ba2</div><div class="card-name">Desayuno \u2014 Elige tu opci\u00f3n</div></div><div class="card-arr">\u2304</div></div><div class="card-bd"><div class="bf-hint">Toca una opci\u00f3n para ver la receta \ud83d\udc47</div><div class="bf-list">'+opts+'</div><div class="tip">\ud83d\udca1 Rota entre las 3 opciones cada 2 d\u00edas.</div></div>';
+  d.querySelector('.card-hd').addEventListener('click',function(){tog(d)});
+  d.querySelectorAll('.bfopt').forEach(function(opt){
+    opt.addEventListener('click',function(e){
+      e.stopPropagation();
+      var bid=opt.dataset.bid;
+      selBf=(selBf===bid)?'':bid;
+      localStorage.setItem('nbf',selBf);
+      renderCards();
+      setTimeout(function(){var cs=document.querySelectorAll('#cardList .card');if(cs[1])cs[1].classList.add('open')},0);
+    });
+  });
+  return d;
+}
+
+function renderCards(){
+  renderHero();
+  var list=document.getElementById('cardList');
+  list.innerHTML='';
+  var day=MD[selDay]||{};
+
+  list.appendChild(mkCard('c1','\u2615','Ingesta n\u00ba1','Matcha &amp; Entreno','<div class="dtxt">Comienza el d\u00eda con matcha. Esta ingesta va ligada al entrenamiento, antes o durante.</div>'));
+  list.appendChild(mkBfCard());
+
+  if(day.libre3){
+    var fl=document.createElement('div');
+    fl.className='card';
+    fl.innerHTML='<div class="card-hd"><div class="card-ico c3">\ud83c\udf89</div><div class="card-info"><div class="card-lbl">Ingesta n\u00ba3</div><div class="card-name">\u00a1D\u00eda libre! <span class="bdg">LIBRE</span></div></div></div><div class="card-bd" style="display:block"><div class="freebox"><div class="big">\ud83c\udf89</div><h3>\u00a1Domingo libre!</h3><p>Come lo que m\u00e1s te apetezca. \u00a1Te lo mereces!</p></div></div>';
+    list.appendChild(fl);
+  } else if(day.comida){
+    var cm=day.comida;
+    list.appendChild(mkCard('c3',cm.e,'Ingesta n\u00ba3 \u00b7 Comida',cm.n+(cm.libre?'<span class="bdg">LIBRE</span>':''),'<div class="dtxt">'+cm.d+'</div><div class="pills"><span class="pill">\ud83c\udf57 150-180g</span><span class="pill">\ud83e\udd69 120-160g</span><span class="pill">\ud83d\udc1f 140-160g</span></div>'));
+  }
+
+  list.appendChild(mkCard('c4','\ud83c\udf6b','Ingesta n\u00ba4 \u00b7 Merienda','Mousse de chocolate o Tostadas de calabac\u00edn','<div class="dtxt">\ud83c\udf6b <strong>Mousse de chocolate</strong> \u2014 ver enlace en tu plan<br>\ud83e\udd52 <strong>Tostadas de calabac\u00edn</strong> \u2014 ver enlace en tu plan</div>'));
+
+  if(day.cena){
+    var cn=day.cena;
+    list.appendChild(mkCard('c5',cn.e,'Ingesta n\u00ba5 \u00b7 Cena',cn.n+(cn.libre?'<span class="bdg">LIBRE</span>':''),'<div class="dtxt">'+cn.d+'</div>'));
+  }
+}
+
+function renderSaved(){
+  var box=document.getElementById('savedBf');
+  if(!selBf){box.innerHTML='A\u00fan no has elegido desayuno. Ve a Agenda y selecciona el tuyo \ud83d\udc46';return}
+  var b=BF.filter(function(x){return x.id===selBf})[0];
+  if(!b)return;
+  box.innerHTML='<strong>'+b.e+' '+b.t+'</strong><br><span style="color:#3a5f40;font-size:.78rem">'+b.s+'</span><br><br><span style="font-size:.76rem;color:#888">'+b.i.join(' \u00b7 ')+'</span>';
+}
+
+renderNav();renderHero();renderCards();
+})();
+</script>
+
+</body>
+</html>
