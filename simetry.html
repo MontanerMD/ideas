@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Espejo de Simetría</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap');
+
+:root {
+–bg: #0a0a0b;
+–surface: #0e0e10;
+–border: #1e1e24;
+–accent: #b8975a;
+–accent-glow: rgba(184,151,90,0.2);
+–green-bright: #3d9e6e;
+–text: #d4cfc6;
+–text-dim: #4a4845;
+–text-mid: #7a7570;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+height: 100%; width: 100%;
+background: var(–bg);
+color: var(–text);
+font-family: ‘DM Mono’, monospace;
+overflow: hidden;
+-webkit-font-smoothing: antialiased;
+}
+
+body::after {
+content: ‘’;
+position: fixed; inset: 0;
+background-image: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘200’ height=‘200’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘200’ height=‘200’ filter=‘url(%23n)’ opacity=‘0.05’/%3E%3C/svg%3E”);
+pointer-events: none; z-index: 999; opacity: 0.45; mix-blend-mode: overlay;
+}
+
+#app { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+
+header {
+flex-shrink: 0;
+display: flex; align-items: center; justify-content: space-between;
+padding: 10px 18px;
+border-bottom: 1px solid var(–border);
+background: var(–surface); z-index: 10;
+}
+
+.header-left { display: flex; align-items: baseline; gap: 12px; }
+
+h1 {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+font-weight: 300; font-style: italic;
+color: var(–accent); letter-spacing: 0.03em;
+}
+
+.tag { font-size: 0.5rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(–text-dim); }
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.live-indicator {
+display: flex; align-items: center; gap: 6px;
+font-size: 0.5rem; letter-spacing: 0.18em;
+text-transform: uppercase; color: var(–text-dim);
+}
+
+.dot { width: 5px; height: 5px; border-radius: 50%; background: var(–text-dim); transition: all 0.4s; }
+.dot.active {
+background: var(–green-bright);
+box-shadow: 0 0 6px var(–green-bright);
+animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+#btn-flip {
+display: flex; align-items: center; gap: 5px;
+padding: 5px 12px;
+border: 1px solid var(–border); background: transparent;
+color: var(–text-mid);
+font-family: ‘DM Mono’, monospace;
+font-size: 0.52rem; letter-spacing: 0.15em; text-transform: uppercase;
+cursor: pointer; border-radius: 2px;
+transition: border-color 0.2s, color 0.2s, background 0.2s;
+white-space: nowrap;
+}
+#btn-flip:hover { border-color: var(–accent); color: var(–accent); background: var(–accent-glow); }
+#btn-flip svg { transition: transform 0.5s; }
+#btn-flip:hover svg { transform: rotate(180deg); }
+
+.stage { flex: 1; position: relative; overflow: hidden; min-height: 0; background: #000; }
+
+#main-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+
+.panel-label {
+position: absolute; top: 12px;
+font-size: 0.48rem; letter-spacing: 0.25em;
+text-transform: uppercase; color: rgba(255,255,255,0.22);
+z-index: 5; pointer-events: none;
+}
+.label-real   { left:  14px; }
+.label-mirror { right: 14px; }
+
+.divider {
+position: absolute; left: 50%; top: 0; bottom: 0;
+transform: translateX(-50%);
+width: 1px; z-index: 20; pointer-events: none;
+}
+.divider-line {
+position: absolute; left: 0; top: 0; bottom: 0; width: 1px;
+background: linear-gradient(to bottom,transparent 0%,var(–accent) 15%,var(–accent) 85%,transparent 100%);
+opacity: 0.45;
+}
+.crosshair { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 30px; height: 30px; }
+.crosshair::before, .crosshair::after { content: ‘’; position: absolute; background: var(–accent); opacity: 0.5; }
+.crosshair::before { width:1px; height:100%; left:50%; transform:translateX(-50%); }
+.crosshair::after  { height:1px; width:100%; top:50%; transform:translateY(-50%); }
+.diamond {
+position: absolute; left: 50%;
+transform: translateX(-50%) rotate(45deg);
+width: 5px; height: 5px;
+border: 1px solid var(–accent); opacity: 0.5;
+}
+.diamond-top { top: 15%; } .diamond-bottom { bottom: 15%; }
+
+#start-screen {
+position: absolute; inset: 0;
+display: flex; flex-direction: column;
+align-items: center; justify-content: center; gap: 24px;
+background: var(–surface); z-index: 30;
+transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#start-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.start-emblem {
+width: 64px; height: 64px;
+border: 1px solid var(–border); border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+position: relative;
+animation: spin-slow 14s linear infinite;
+}
+@keyframes spin-slow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.start-emblem::before {
+content: ‘’; position: absolute; inset: 7px;
+border-radius: 50%; border: 1px solid rgba(184,151,90,0.15);
+}
+.start-emblem svg { animation: spin-slow 14s linear infinite reverse; }
+
+.start-copy { text-align: center; }
+.start-copy p { font-family: ‘Cormorant Garamond’, serif; font-style: italic; font-size: 1rem; color: var(–text-mid); margin-bottom: 6px; }
+.start-copy span { font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(–text-dim); }
+
+#btn-start {
+padding: 11px 32px;
+border: 1px solid var(–accent); background: transparent;
+color: var(–accent);
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+cursor: pointer; border-radius: 2px;
+transition: background 0.25s, color 0.25s, box-shadow 0.25s;
+}
+#btn-start:hover { background: var(–accent); color: #000; box-shadow: 0 0 20px var(–accent-glow); }
+
+#error-screen {
+position: absolute; inset: 0;
+display: none; flex-direction: column;
+align-items: center; justify-content: center; gap: 14px;
+background: var(–surface); z-index: 30;
+text-align: center; padding: 24px;
+}
+#error-screen.show { display: flex; }
+#error-screen p { font-size: 0.62rem; color: var(–text-mid); line-height: 1.8; }
+#error-screen small { font-size: 0.48rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(–text-dim); }
+#btn-retry {
+margin-top: 6px; padding: 8px 24px;
+border: 1px solid var(–border); background: transparent;
+color: var(–text-mid);
+font-family: ‘DM Mono’, monospace;
+font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase;
+cursor: pointer; border-radius: 2px;
+transition: border-color 0.2s, color 0.2s;
+}
+#btn-retry:hover { border-color: var(–accent); color: var(–accent); }
+
+.controls {
+flex-shrink: 0;
+display: flex; align-items: center;
+padding: 10px 18px;
+border-top: 1px solid var(–border);
+background: var(–surface); z-index: 10;
+gap: 14px;
+}
+
+.ctrl-label { font-size: 0.48rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(–text-dim); white-space: nowrap; flex-shrink: 0; }
+
+.slider-wrap { flex: 1; position: relative; height: 20px; display: flex; align-items: center; }
+.slider-track-bg { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); height: 1px; background: var(–border); border-radius: 1px; }
+.slider-fill { position: absolute; left: 0; top: 50%; transform: translateY(-50%); height: 1px; background: var(–accent); border-radius: 1px; pointer-events: none; }
+
+input[type=range] { -webkit-appearance: none; appearance: none; position: relative; z-index: 2; width: 100%; background: transparent; outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-runnable-track { height: 1px; background: transparent; }
+input[type=range]::-moz-range-track { height: 1px; background: transparent; }
+input[type=range]::-webkit-slider-thumb {
+-webkit-appearance: none;
+width: 13px; height: 13px; border-radius: 50%;
+background: var(–bg); border: 1px solid var(–accent);
+box-shadow: 0 0 6px var(–accent-glow);
+margin-top: -6px;
+transition: transform 0.15s, box-shadow 0.15s;
+}
+input[type=range]::-moz-range-thumb {
+width: 13px; height: 13px; border-radius: 50%;
+background: var(–bg); border: 1px solid var(–accent);
+box-shadow: 0 0 6px var(–accent-glow);
+border: 1px solid var(–accent);
+}
+input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.25); box-shadow: 0 0 10px var(–accent); }
+
+.ctrl-value { font-size: 0.58rem; color: var(–accent); min-width: 36px; text-align: right; flex-shrink: 0; }
+
+.bars { display: flex; gap: 2px; align-items: flex-end; flex-shrink: 0; }
+.bar { width: 3px; background: var(–border); border-radius: 1px; transition: background 0.12s; }
+.bar.on { background: var(–accent); }
+.bar:nth-child(1){height:4px} .bar:nth-child(2){height:7px}
+.bar:nth-child(3){height:10px} .bar:nth-child(4){height:13px}
+.bar:nth-child(5){height:16px}
+
+@media (max-width: 420px) { .tag, .bars { display: none; } .controls { gap: 10px; } }
+</style>
+
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="header-left">
+      <h1>Espejo de Simetría</h1>
+      <span class="tag">Análisis Quirúrgico</span>
+    </div>
+    <div class="header-right">
+      <div class="live-indicator">
+        <div class="dot" id="live-dot"></div>
+        <span id="live-text">STANDBY</span>
+      </div>
+      <button id="btn-flip" title="Cambiar cámara">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M1 4v6h6M23 20v-6h-6"/>
+          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/>
+        </svg>
+        VOLTEAR
+      </button>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="main-canvas"></canvas>
+    <span class="panel-label label-real">REAL</span>
+    <span class="panel-label label-mirror">ESPEJO</span>
+
+```
+<div class="divider">
+  <div class="divider-line"></div>
+  <div class="diamond diamond-top"></div>
+  <div class="crosshair"></div>
+  <div class="diamond diamond-bottom"></div>
+</div>
+
+<div id="start-screen">
+  <div class="start-emblem">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b8975a" stroke-width="1.2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+    </svg>
+  </div>
+  <div class="start-copy">
+    <p>Análisis de simetría facial en tiempo real</p>
+    <span>Se requiere acceso a la cámara</span>
+  </div>
+  <button id="btn-start">Iniciar cámara</button>
+</div>
+
+<div id="error-screen">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4a4845" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="12" y1="8" x2="12" y2="12"/>
+    <circle cx="12" cy="16" r="0.5" fill="#4a4845"/>
+  </svg>
+  <p id="error-text">No se pudo acceder a la cámara.</p>
+  <small>Verifica los permisos en tu navegador</small>
+  <button id="btn-retry">Reintentar</button>
+</div>
+```
+
+  </div>
+
+  <div class="controls">
+    <span class="ctrl-label">Fantasma</span>
+    <div class="slider-wrap">
+      <div class="slider-track-bg"></div>
+      <div class="slider-fill" id="slider-fill"></div>
+      <input type="range" id="opacity-slider" min="0" max="100" value="50">
+    </div>
+    <span class="ctrl-value" id="opacity-value">50%</span>
+    <div class="bars" id="bars-el">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div>
+    </div>
+  </div>
+
+</div>
+
+<video id="vid" autoplay playsinline muted
+style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;">
+</video>
+
+<script>
+(function () {
+  'use strict';
+
+  var vid        = document.getElementById('vid');
+  var canvas     = document.getElementById('main-canvas');
+  var ctx        = canvas.getContext('2d');
+  var startScr   = document.getElementById('start-screen');
+  var errorScr   = document.getElementById('error-screen');
+  var errorTxt   = document.getElementById('error-text');
+  var btnStart   = document.getElementById('btn-start');
+  var btnRetry   = document.getElementById('btn-retry');
+  var btnFlip    = document.getElementById('btn-flip');
+  var liveDot    = document.getElementById('live-dot');
+  var liveTxt    = document.getElementById('live-text');
+  var slider     = document.getElementById('opacity-slider');
+  var sliderFill = document.getElementById('slider-fill');
+  var opacVal    = document.getElementById('opacity-value');
+  var barsEl     = document.getElementById('bars-el').children;
+
+  var stream       = null;
+  var raf          = null;
+  var running      = false;
+  var facing       = 'user';
+  var ghostOpacity = 0.5;
+  var CW = 0, CH = 0;
+
+  /* ── Resize ── */
+  function syncSize() {
+    var r   = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    CW = Math.round(r.width  * dpr);
+    CH = Math.round(r.height * dpr);
+    canvas.width  = CW;
+    canvas.height = CH;
+  }
+
+  if (window.ResizeObserver) {
+    new ResizeObserver(syncSize).observe(canvas);
+  } else {
+    window.addEventListener('resize', syncSize);
+  }
+  syncSize();
+
+  /* ── Slider ── */
+  function applySlider(v) {
+    ghostOpacity = v / 100;
+    opacVal.textContent = v + '%';
+    sliderFill.style.width = v + '%';
+    for (var i = 0; i < barsEl.length; i++) {
+      barsEl[i].classList.toggle('on', v > i * 20);
+    }
+  }
+
+  slider.addEventListener('input', function () { applySlider(+slider.value); });
+  applySlider(50);
+
+  /* ── Draw ── */
+  function draw() {
+    if (!running) return;
+    raf = requestAnimationFrame(draw);
+
+    if (!vid.videoWidth || vid.readyState < 2) return;
+
+    var vw = vid.videoWidth;
+    var vh = vid.videoHeight;
+    var half = CW / 2;
+
+    /* Cover-fit: fill full canvas, center-crop */
+    var scale = Math.max(CW / vw, CH / vh);
+    var dw = vw * scale;
+    var dh = vh * scale;
+    var dx = (CW - dw) / 2;
+    var dy = (CH - dh) / 2;
+
+    ctx.clearRect(0, 0, CW, CH);
+
+    /* LEFT — real image, clip to left half */
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, half, CH);
+    ctx.clip();
+    ctx.drawImage(vid, dx, dy, dw, dh);
+    ctx.restore();
+
+    /* RIGHT — blend real + mirrored, clip to right half */
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(half, 0, half, CH);
+    ctx.clip();
+
+    /* real layer */
+    ctx.globalAlpha = 1 - ghostOpacity;
+    ctx.drawImage(vid, dx, dy, dw, dh);
+
+    /* mirrored ghost layer — flip around canvas center */
+    ctx.globalAlpha = ghostOpacity;
+    ctx.save();
+    ctx.translate(CW, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(vid, dx, dy, dw, dh);
+    ctx.restore();
+
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  /* ── Start camera ── */
+  function startCam() {
+    cancelAnimationFrame(raf);
+    running = false;
+
+    if (stream) {
+      stream.getTracks().forEach(function (t) { t.stop(); });
+      stream = null;
+    }
+
+    var constraints = {
+      video: {
+        facingMode: { ideal: facing },
+        width:  { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    };
+
+    navigator.mediaDevices.getUserMedia(constraints).then(function (s) {
+      stream = s;
+      vid.srcObject = stream;
+
+      /* Play promise + onplaying fallback */
+      var played = false;
+      function onReady() {
+        if (played) return;
+        played = true;
+        syncSize();
+        startScr.classList.add('hidden');
+        errorScr.classList.remove('show');
+        liveDot.classList.add('active');
+        liveTxt.textContent = 'EN VIVO';
+        running = true;
+        draw();
+      }
+
+      vid.onplaying = onReady;
+
+      var p = vid.play();
+      if (p && p.then) {
+        p.then(function () {
+          /* play() resolved but onplaying might not have fired yet on some
+             mobile browsers — set a short fallback */
+          setTimeout(onReady, 300);
+        }).catch(onError);
+      } else {
+        setTimeout(onReady, 500);
+      }
+
+    }).catch(onError);
+  }
+
+  function onError(err) {
+    console.error('Camera error:', err);
+    startScr.classList.add('hidden');
+    errorScr.classList.add('show');
+    liveDot.classList.remove('active');
+    liveTxt.textContent = 'ERROR';
+
+    var msgs = {
+      NotAllowedError:       'Permiso de cámara denegado. Habilítalo en la configuración del navegador.',
+      PermissionDeniedError: 'Permiso de cámara denegado.',
+      NotFoundError:         'No se encontró ninguna cámara en este dispositivo.',
+      DevicesNotFoundError:  'No se encontró ninguna cámara en este dispositivo.',
+      NotReadableError:      'La cámara está siendo usada por otra aplicación.',
+      TrackStartError:       'La cámara está siendo usada por otra aplicación.',
+      OverconstrainedError:  'La cámara no soporta la configuración solicitada.',
+    };
+    errorTxt.textContent = msgs[err.name] || ('Error: ' + (err.message || err.name));
+  }
+
+  btnStart.addEventListener('click', startCam);
+  btnRetry.addEventListener('click', startCam);
+
+  btnFlip.addEventListener('click', function () {
+    if (!running) return;
+    facing = facing === 'user' ? 'environment' : 'user';
+    startCam();
+  });
+
+  /* Guard */
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    startScr.classList.add('hidden');
+    errorScr.classList.add('show');
+    errorTxt.textContent = 'Tu navegador no soporta acceso a cámara, o esta página no se sirve por HTTPS.';
+  }
+
+}());
+</script>
+
+</body>
+</html>
